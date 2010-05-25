@@ -1,2 +1,5 @@
-1. Standardize code functions
-2. Rename Vars based on standardization.
+1. Standardize code functions.
+2. Rename vars based on standardization.
+3. Remove unused functions.
+4. Remove unused vars.
+5. Add ECAB Notification.
