@@ -1,0 +1,2 @@
+1. Standardize code functions
+2. Rename Vars based on standardization.
