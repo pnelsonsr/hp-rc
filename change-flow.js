@@ -1,6 +1,6 @@
 // -------------------------------------------------------------------------------------
    name      =  "change-flow.js" ;
-   version   =  "0.1.18a1"       ;
+   version   =  "0.1.19a1"       ;
    revision  =  "2010-139"       ;
 // -------------------------------------------------------------------------------------
 //  Functions for RFC Notification 
@@ -19,8 +19,6 @@ var RFC_APP_DEV_HEADER           = "<br><b>Event: </b> Voting is complete, and t
 var RFC_APP_DEV_FOOTER           = "<br><br><b>Action: </b> As the Change Owner, please take note of the voting result.";
 var RFC_PEND_APP_TO_SCHED_HEADER = "<br><b>Event: </b> The RFC has been <b><u>Approved</u></b> and is now <b><u>Scheduled</u></b> for implementation.";
 var RFC_PEND_APP_TO_SCHED_FOOTER = "<br><br><b>Action: </b> As the <b><u>Change Owner</u></b>, please take note that your change has been <b><u>Approved</u></b>.  As the <b><u>Change Implementor</u></b>, please take note of the <b><u>Planned Start Date</u></b> and plan accordingly.";
-var RFC_NEW_TO_SCHED_HEADER      = "<br><b>Event: </b> The Standard RFC has been <b><u>Scheduled</u></b> for implementation.";
-var RFC_NEW_TO_SCHED_FOOTER      = "<br><br><b>Action: </b>As the <b><u>Change Implementor</u></b>, please take note of the <b><u>Planned Start Date</u></b> and plan accordingly.";
 var RFC_SCHED_TO_IMP_HEADER      = "<br><b>Event: </b> The RFC phase has changed from <b><u>Scheduled</u></b> to <b><u>Implemented.</u></b>";
 var RFC_SCHED_TO_IMP_FOOTER      = "<br><br><b>Action: </b> As the Change Owner, please validate the RFC has been implemented as expected and then <b><u>Close</u></b> it.";
 var RFC_IMP_TO_CLOSE_HEADER      = "<br><b>Event: </b> The RFC phase has changed from <b><u>Implemented</u></b> to <b><u>Closed.</u></b>";
@@ -341,20 +339,6 @@ function notifyNewToOpen(prevChange,newChange,notificationContext) {
       logger.info(" ### notifyNewToOpen Exit true ###");
       return true;
     }
-  } else if (sNewPhase.equals("Standard")) {
-    if (prevChange==null && sNewStatus==STATUS_SCHEDULED && sNewStatus!=sOldStatus) {
-      aField = ["cnw-originator-account","cnw-initiated-by-account"];
-      for( i=0 ; i<aField.length ; i++ ) {
-        sData = AllTrim(newChange.getField(aField[i]));
-        if (!(sData.equals(null) || sData.equals(""))) {
-          logger.info(" - adding "+aField[i]+" to notification -> " + sData) ; notificationContext.addUser(sData);
-        }
-      }
-      sActText = "No action required at this time.  Just sit back and enjoy the ride!";
-      notificationContext.setMessage(MsgCompile(sEvtText,sActText,sActFont));
-      logger.info(" ### notifyNewToOpen Exit true ###");
-      return true;
-    }
   }
   logger.info(sLog + " ### notifyNewToOpen Exit false ###");
   return false;
@@ -366,42 +350,8 @@ function notifyNewToScheduled(prevChange,newChange,notificationContext) {
 //-----------------------------------------------------------------------------
   sLog = newChange.getField("request-id");
   logger.info(sLog+" ### notifyNewToScheduled Entry ###");
-  sNewPhase = newChange.getField("category") ; sNewStatus = newChange.getField("status") ; sOldStatus = (prevChange==null) ? "" : prevChange.getField("status"); 
-  if (sNewPhase.equals("Standard") && sNewStatus == STATUS_SCHEDULED) {
-    if (prevChange!=null || sNewStatus!=sOldStatus) {
-      if (newChange.getField("cnw-implementor-account") != null && !"".equalsIgnoreCase(newChange.getField("cnw-implementor-account"))) {
-        message = RFC_NEW_TO_SCHED_HEADER + "<br><br>";
-        message = message + " <b>Change Owner: </b>" + newChange.getField("contact-person") + "<br><br>";
-        message = message + " <b>Change Implementor: </b>" + newChange.getField("cw-implementor");
-        message = message + RFC_NEW_TO_SCHED_FOOTER;
-        logger.info(" - new cnw-implementor-account is not null");
-        logger.info(" - adding cnw-implementor-account to notification -> " + newChange.getField("cnw-implementor-account"));
-        notificationContext.addUser(newChange.getField("cnw-implementor-account"));          
-        logger.info(" - adding cnw-change-owner-account to notification -> " + newChange.getField("cnw-change-owner-account"));
-        notificationContext.addUser(newChange.getField("cnw-change-owner-account"));
-        notificationContext.setMessage(message);
-        logger.info(sLog+" ### notifyNewToScheduled Exit true ###");
-        return true;
-      } else {
-        if (newChange.getField("cw-implementing-team") != null && !"".equalsIgnoreCase(newChange.getField("cw-implementing-team"))) {
-          message = RFC_NEW_TO_SCHED_HEADER + "<br><br>";
-          message = message + " <b>Change Implementor Team: </b>" + newChange.getField("cw-implementing-team");
-          message = message + RFC_NEW_TO_SCHED_FOOTER;
-          logger.info(" - new cnw-implementor-account is null and cw-implementing-team is not null");
-          logger.info(" - adding cw-implementing-team to notification -> " + newChange.getField("cw-implementing-team"));
-          notificationContext.addUser(newChange.getField("cw-implementing-team"));
-          logger.info(" - adding cnw-change-owner-account to notification -> " + newChange.getField("cnw-change-owner-account"));
-          notificationContext.addUser(newChange.getField("cnw-change-owner-account"));
-          notificationContext.setMessage(message);
-          logger.info(sLog+" ### notifyNewToScheduled Exit true ###");
-          return true;
-        }
-        logger.info(" # ERROR # cnw-implementor-account and cw-implementing-team are null -> Cancelling new to scheduled notification!");
-      }
-    }
-  }
-  logger.info(sLog+" ### notifyNewToScheduled Exit false ###");
-  return false;
+  logger.info(sLog+" ### notifyNewToScheduled Exit true ###");
+  return true;
 }
 
 function notifyPendingApprovalToScheduled(prevChange,newChange,notificationContext) {
