@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------
-// name......:  change-flow.js
-// version...:  0.1.15
-// revision..:  2010-137
+   name      =  "change-flow.js" ;
+   version   =  "0.1.16c1"       ;
+   revision  =  "2010-138"       ;
 // -------------------------------------------------------------------------------------
 //  Functions for RFC Notification 
 // -------------------------------------------------------------------------------------
@@ -12,7 +12,6 @@ importPackage(Packages.java.util);
 //-----------------------------------------------------------------------------
 // Variable Assignment Begin
 //-----------------------------------------------------------------------------
-var VERSION                      = "0.1.15 -> 2010-137";
 var USE_CASE_1_HEADER            = "Notification Event Use Case 1 - Assignment Change <br> ";
 var ASSIGN_CHANGE_HEADER         = "<br><b>Event: </b> RFC <b><u>Assignment Change</u></b> has occurred.<br><br>";
 var ASSIGN_CHANGE_FOOTER         = "<br><br><b>Action: </b> Please take note that this assignment change has taken place and <b><u>you may have a task to complete.</u></b>";
@@ -40,19 +39,19 @@ var RFC_CHANGE_CANCELLED_FOOTER  = "<br><br><b>Action: </b> As the Change Owner 
 // Variable Assignment End
 //--------------------------
 
-function preChangeProcess(prevChange, newChange) {
+function preChangeProcess(prevChange,newChange) {
 //-----------------------------------------------------------------------------
 // Does Nothing
 //-----------------------------------------------------------------------------
 }
 
-function postChangeProcess(prevChange, newChange) {
+function postChangeProcess(prevChange,newChange) {
 //-----------------------------------------------------------------------------
 // Does Nothing
 //-----------------------------------------------------------------------------
 }
 
-function shouldAnalyze(prevChange, newChange) {
+function shouldAnalyze(prevChange,newChange) {
 //-----------------------------------------------------------------------------
 // 
 //-----------------------------------------------------------------------------
@@ -72,7 +71,7 @@ function shouldAnalyze(prevChange, newChange) {
   return result;
 }
 
-function shouldCalcImpact(prevChange, newChange) {
+function shouldCalcImpact(prevChange,newChange) {
 //-----------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------
@@ -100,7 +99,7 @@ function shouldCalcImpact(prevChange, newChange) {
   return newChangeValidStatus;
 }
 
-function preCalcRisk(prevChange, newChange) {
+function preCalcRisk(prevChange,newChange) {
 //-----------------------------------------------------------------------------
 // This script is called after shouldCalcRisk return true and before risk 
 // calculation / re-calculation,
@@ -108,7 +107,7 @@ function preCalcRisk(prevChange, newChange) {
 //-----------------------------------------------------------------------------
 }
 
-function shouldCalcRisk(prevChange, newChange) {
+function shouldCalcRisk(prevChange,newChange) {
 //-----------------------------------------------------------------------------
 // Note - this script is also called in risk recalculation
 //-----------------------------------------------------------------------------
@@ -119,7 +118,7 @@ function shouldCalcRisk(prevChange, newChange) {
   return shouldCalc;
 }
 
-function overrideRisk(prevChange, newChange, analysis, result) {
+function overrideRisk(prevChange,newChange,analysis,result) {
 //--------------------------------------------------------------
 // Script that allows overriding the standard risk calculation.
 // The reasons for overriding the risk should be returned using 
@@ -128,7 +127,7 @@ function overrideRisk(prevChange, newChange, analysis, result) {
 //--------------------------------------------------------------
 }
 
-function shouldCalcCollision(prevChange, newChange) {
+function shouldCalcCollision(prevChange,newChange) {
 //----------------------------------------------------------------------------
 // Script that allows to define for which changes the collisions will be 
 // calculated. Should be used as a fuse, only in order to prevent performance 
@@ -139,20 +138,20 @@ function shouldCalcCollision(prevChange, newChange) {
   return true;
 }
 
-function addActionItemsOnChange(prevChange, newChange, actionItemsContext) {
+function addActionItemsOnChange(prevChange,newChange,actionItemsContext) {
 //--------------------------------------------------------------------------
 // Returns false for every call
 //--------------------------------------------------------------------------
   return false;
 }
 
-function getUsersToNotify(prevChange, newChange, notificationContext) {
+function getUsersToNotify(prevChange,newChange,notificationContext) {
 //-----------------------------------------------------------------------------
 // used for notification email processing * This controls it all *
 //-----------------------------------------------------------------------------
   sLog = newChange.getField("request-id");
-  logger.info(sLog + " *** getUsersToNotify Entry ***");
-  logger.info(sLog + " - version " + VERSION);
+  logger.info(sLog+" *** getUsersToNotify Entry ***");
+  logger.info(sLog+" - version "+version+" -> "+revision);
   result = false;
   if (!result) {result = notifyCancelled                  (prevChange,newChange,notificationContext);}
   if (!result) {result = notifyPlannedStartEnd            (prevChange,newChange,notificationContext);}
@@ -168,7 +167,7 @@ function getUsersToNotify(prevChange, newChange, notificationContext) {
   logger.info(sLog + " *** getUsersToNotify Exit ***");
 }
 
-function notifyCancelled(prevChange, newChange, notificationContext) {
+function notifyCancelled(prevChange,newChange,notificationContext) {
 //-----------------------------------------------------------------------------
 // Notification for Change Is Cancelled
 //-----------------------------------------------------------------------------
@@ -191,16 +190,16 @@ function notifyCancelled(prevChange, newChange, notificationContext) {
   return false;
 }
 
-function notifyPlannedStartEnd(prevChange, newChange, notificationContext) {
+function notifyPlannedStartEnd(prevChange,newChange,notificationContext) {
 //-----------------------------------------------------------------------------
 // Notification for Change Planned Start/End Date-Time Changed
 //-----------------------------------------------------------------------------
   sLog = newChange.getField("request-id");
   logger.info(sLog + " ### notifyPlannedDate Entry ###");
-  sNewStatus = newChange.getField("status") ; sOldStatus = (prevChange!=null) ? prevChange.getField("status") : "";
+  sNewStatus = newChange.getField("status")             ; sOldStatus = (prevChange!=null) ? prevChange.getField("status")             : "";
+  oPSNew     = newChange.getField("planned-start-time") ; oPSOld     = (prevChange!=null) ? prevChange.getField("planned-start-time") : "";
+  oPENew     = newChange.getField("planned-end-time")   ; oPEOld     = (prevChange!=null) ? prevChange.getField("planned-end-time")   : "";
   if (prevChange!=null && sNewStatus.equals(sOldStatus)) {
-    oPSNew = newChange.getField("planned-start-time") ; oPSOld = prevChange.getField("planned-start-time");
-    oPENew = newChange.getField("planned-end-time")   ; oPEOld = prevChange.getField("planned-end-time");
     if (!oPSNew.equals(oPSOld) || !oPENew.equals(oPEOld)) {
       bAdd = false;
       if (sNewStatus==STATUS_OPEN || sNewStatus==STATUS_PENDING_APPROVAL || sNewStatus==STATUS_PENDING_ACCEPTANCE || sNewStatus==STATUS_SCHEDULED) {
@@ -224,63 +223,43 @@ function notifyPlannedStartEnd(prevChange, newChange, notificationContext) {
         }
       }
       if (bAdd) {
-        sMsg =  "<br>";
-  			sMsg += "<table class=\"textfont\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">";
-        sMsg += " <tbody>";
-        sMsg += "  <tr><th class=\"hl\" align=\"left\">RFC Event</th></tr>";
-        sMsg += "  <tr><th class=\"space\" align=\"left\"></th></tr>";
-        sMsg += "	</tbody>";
-        sMsg += "</table>";
-        sMsg += "<table class=\"textfont\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">";
-        sMsg += " <tbody>";
-        sMsg += "  <tr><td class=\"descr\">The <b><u>Planned Start/End</b></u> of the RFC has <b>changed</b>!</td></tr>";
-        sMsg += "  <tr><td></td></tr>";
-        sMsg += "	</tbody>";
-        sMsg += "</table>";
-        sMsg += "<br>";
-        sMsg += "<table>";
+        sEvtText = "The <b><u>Planned Start/End</b></u> of the RFC has <b>changed</b>!";
+        sActText = "As a person or team associated to this RFC, please take note of the change in date and <b><u>plan accordingly</u></b>.";
+        sActFont = "red";
+        sEvtTable = "<table>";
         if(!oPSNew.equals(oPSOld)) {
-          sMsg += "<tr><td class=\"chl\" width=\"25%\">New Planned Start:</td>      <td class=\"ctext\">"+DOut(oPSNew)+"</td></tr>";
+          sEvtTable += "<tr><td class=\"chl\" width=\"25%\">New Planned Start:</td><td class=\"ctext\">"+DOut(oPSNew)+"</td></tr>";
           sCorP = "Previous";
         } else {
           sCorP = "Current";
         }
-        sMsg += "<tr><td class=\"chl\" width=\"25%\">"+sCorP+" Planned Start:</td> <td class=\"ctext\">"+DOut(oPSOld)+"</td></tr>";
-        sMsg += "<tr><td>&nbsp;</td></tr>";
+        sEvtTable += "<tr><td class=\"chl\" width=\"25%\">"+sCorP+" Planned Start:</td> <td class=\"ctext\">"+DOut(oPSOld)+"</td></tr>";
+        sEvtTable += "<tr><td>&nbsp;</td></tr>";
         if(!oPENew.equals(oPEOld)) {
-          sMsg += "<tr><td class=\"chl\" width=\"25%\">New Planned End:</td>        <td class=\"ctext\">"+DOut(oPENew)+"</td></tr>";
+          sEvtTable += "<tr><td class=\"chl\" width=\"25%\">New Planned End:</td><td class=\"ctext\">"+DOut(oPENew)+"</td></tr>";
           sCorP = "Previous";
         } else {
           sCorP = "Current";
         }
-        sMsg += "<tr><td class=\"chl\" width=\"25%\">"+sCorP+" Planned End:</td>   <td class=\"ctext\">"+DOut(oPEOld)+"</td></tr>";
-        sMsg += "</table>";
-        sMsg += "<br>";
-  			sMsg += "<table class=\"textfont\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">";
-        sMsg += " <tbody>";
-        sMsg += "  <tr><th class=\"hl\" align=\"left\">RFC Action Needed</th></tr>";
-        sMsg += "  <tr><th class=\"space\" align=\"left\"></th></tr>";
-        sMsg += "	</tbody>";
-        sMsg += "</table>";
-        sMsg += "<table class=\"textfont\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">";
-        sMsg += " <tbody>";
-        sMsg += "  <tr><td class=\"descr\">As a person or team associated to this RFC, please take note of the change in date and <b><u>plan accordingly</u></b>.</td></tr>";
-        sMsg += "  <tr><td></td></tr>";
-        sMsg += "	</tbody>";
-        sMsg += "</table>";
-        notificationContext.setMessage(sMsg);
+        sEvtTable += "<tr><td class=\"chl\" width=\"25%\">"+sCorP+" Planned End:</td><td class=\"ctext\">"+DOut(oPEOld)+"</td></tr>";
+        sEvtTable += "</table>";
+        sEvtTable += "<br>";
+        notificationContext.setMessage(MsgCompile(sEvtText,sActText,sActFont,sEvtTable));
         logger.info(sLog + " ### notifyPlannedDate Exit true ###");
         return true;
       }
     }
-  } else {
-    logger.info(" - Start/End has changed but phase has changed also which has precedence -> exiting");
+  } 
+  if (prevChange!=null && !sNewStatus.equals(sOldStatus)) {
+     if (!oPSNew.equals(oPSOld) || !oPENew.equals(oPEOld)) {
+       logger.info(" - Planned Start/End and Phase has changed. Phase has precedence! -> exiting");
+     }
   }
   logger.info(sLog + " ### notifyPlannedDate Exit false ###");
   return false;
 }
 
-function notifyApprovalRequested(prevChange, newChange, notificationContext) {
+function notifyApprovalRequested(prevChange,newChange,notificationContext) {
 //-----------------------------------------------------------------------------
 // Notification for cnw-pending-approval-groups
 //-----------------------------------------------------------------------------
@@ -321,15 +300,16 @@ function notifyApprovalRequested(prevChange, newChange, notificationContext) {
   return false;
 }
 
-function notifyNewToOpen(prevChange, newChange,  notificationContext) {
+function notifyNewToOpen(prevChange,newChange,notificationContext) {
 //-----------------------------------------------------------------------------
 // Notification for New To Open
 //-----------------------------------------------------------------------------
   sLog = newChange.getField("request-id");
   logger.info(sLog + " ### notifyNewToOpen Entry ###");
-  sNewPhase = newChange.getField("category") ; sNewStatus = newChange.getField("status");
+  sEvtText = "A new RFC has transitioned from <b><u>New</u></b> to <b><u>Open.</u>" ; sActFont = "red";
+  sNewPhase = newChange.getField("category") ; sNewStatus = newChange.getField("status") ; sOldStatus = (prevChange==null) ? "" : prevChange.getField("status"); 
   if (sNewPhase.equals("Normal") || sNewPhase.equals("Emergency")) {
-    if (prevChange == null && sNewStatus == STATUS_OPEN) {
+    if (prevChange==null && sNewStatus==STATUS_OPEN && sNewStatus!=sOldStatus) {
       bNoCTL = false ; aField = ["cnw-team-lead-account","cnw-originator-account","cnw-initiated-by-account"];
       for( i=0 ; i<aField.length ; i++ ) {
         sData = AllTrim(newChange.getField(aField[i]));
@@ -341,39 +321,26 @@ function notifyNewToOpen(prevChange, newChange,  notificationContext) {
         }
       }
       if (bNoCTL) {
-        sCTLText = "There was NO <b>Change Team Lead</b> identified for this RFC.  One needs to be identified to assess the RFC and prepare it for review.";
+        sActText = "There was NO <b>Change Team Lead</b> identified for this RFC.  One needs to be identified to assess the RFC and prepare it for review.";
       } else {
-        sData = AllTrim(newChange.getField("cnw-change-manager"));
-        sCTLText = "The <b>Change Team Lead</b> ("+sData+") identified for this RFC needs to <b><u>assess the change and prepare it for review</u>.";
+        sActText = "The <b>Change Team Lead</b> ("+newChange.getField("cnw-change-manager")+") identified for this RFC needs to <b><u>taka gander at the RFC and pare'it fur raview</u>.";
+        //sActText = "The <b>Change Team Lead</b> ("+newChange.getField("cnw-change-manager")+") identified for this RFC needs to <b><u>assess the RFC and prepare it for review</u>.";
       }
-      sMsg =  "<br>";
-			sMsg += "<table class=\"textfont\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">";
-      sMsg += " <tbody>";
-      sMsg += "  <tr><th class=\"hl\" align=\"left\">RFC Event</th></tr>";
-      sMsg += "  <tr><th class=\"space\" align=\"left\"></th></tr>";
-      sMsg += "	</tbody>";
-      sMsg += "</table>";
-      sMsg += "<table class=\"textfont\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">";
-      sMsg += " <tbody>";
-      sMsg += "  <tr><td class=\"descr\">A new RFC has transitioned from <b><u>New</u></b> to <b><u>Open.</u></td></tr>";
-      sMsg += "  <tr><td></td></tr>";
-      sMsg += "	</tbody>";
-      sMsg += "</table>";
-      sMsg += "<br>";
-      sMsg += "<table>";
-			sMsg += "<table class=\"textfont\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">";
-      sMsg += " <tbody>";
-      sMsg += "  <tr><th class=\"hl\" align=\"left\">RFC Action Needed</th></tr>";
-      sMsg += "  <tr><th class=\"space\" align=\"left\"></th></tr>";
-      sMsg += "	</tbody>";
-      sMsg += "</table>";
-      sMsg += "<table class=\"textfont\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">";
-      sMsg += " <tbody>";
-      sMsg += "  <tr><td class=\"descr\">"+sCTLText+"</td></tr>";
-      sMsg += "  <tr><td></td></tr>";
-      sMsg += "	</tbody>";
-      sMsg += "</table>";
-      notificationContext.setMessage(sMsg);
+      notificationContext.setMessage(MsgCompile(sEvtText,sActText,sActFont));
+      logger.info(" ### notifyNewToOpen Exit true ###");
+      return true;
+    }
+  } else if (sNewPhase.equals("Standard")) {
+    if (prevChange==null && sNewStatus==STATUS_SCHEDULED && sNewStatus!=sOldStatus) {
+      aField = ["cnw-originator-account","cnw-initiated-by-account"];
+      for( i=0 ; i<aField.length ; i++ ) {
+        sData = AllTrim(newChange.getField(aField[i]));
+        if (!(sData.equals(null) || sData.equals(""))) {
+          logger.info(" - adding "+aField[i]+" to notification -> " + sData) ; notificationContext.addUser(sData);
+        }
+      }
+      sActText = "No action required at this time.  Just sit back and enjoy the ride!";
+      notificationContext.setMessage(MsgCompile(sEvtText,sActText,sActFont));
       logger.info(" ### notifyNewToOpen Exit true ###");
       return true;
     }
@@ -439,7 +406,7 @@ function notifyNewToScheduled(prevChange,newChange,notificationContext) {
   return false;
 }
 
-function notifyPendingApprovalToScheduled(prevChange, newChange, notificationContext) {
+function notifyPendingApprovalToScheduled(prevChange,newChange,notificationContext) {
 //-----------------------------------------------------------------------------
 // Notification for changes moving from pending approval to scheduled
 //-----------------------------------------------------------------------------
@@ -518,7 +485,7 @@ function notifyScheduledToClosed(prevChange,newChange,notificationContext) {
   return false;
 }
 
-function notifyScheduledToImplemented(prevChange, newChange,notificationContext) {
+function notifyScheduledToImplemented(prevChange,newChange,notificationContext) {
 //-----------------------------------------------------------------------------
 // Notification for Scheduled To Implemented
 //-----------------------------------------------------------------------------
@@ -542,7 +509,7 @@ function notifyScheduledToImplemented(prevChange, newChange,notificationContext)
   return false;
 }
 
-function notifyImplementedToClosed(prevChange, newChange,notificationContext) {
+function notifyImplementedToClosed(prevChange,newChange,notificationContext) {
 //-----------------------------------------------------------------------------
 // Notification for Implemented To Closed
 //-----------------------------------------------------------------------------
@@ -567,7 +534,7 @@ function notifyImplementedToClosed(prevChange, newChange,notificationContext) {
   return false;
 }
 
-function notifyTypeChanged(prevChange, newChange, notificationContext) {
+function notifyTypeChanged(prevChange,newChange,notificationContext) {
 //-----------------------------------------------------------------------------
 // Notification for RFC Type Changes
 //-----------------------------------------------------------------------------
@@ -590,7 +557,7 @@ function notifyTypeChanged(prevChange, newChange, notificationContext) {
   return false;
 }
 
-function notifyAssignmentChanged(prevChange, newChange, notificationContext) {
+function notifyAssignmentChanged(prevChange,newChange,notificationContext) {
 //-----------------------------------------------------------------------------
 // Notification for Assignment Changes
 //-----------------------------------------------------------------------------
@@ -622,7 +589,7 @@ function notifyAssignmentChanged(prevChange, newChange, notificationContext) {
   return false;
 }
 
-function shouldCalcTimePeriods(prevChange, newChange) {
+function shouldCalcTimePeriods(prevChange,newChange) {
 //-----------------------------------------------------------------------------
 // Check for Should Calc Time Periods
 // Always Returns true
@@ -630,7 +597,7 @@ function shouldCalcTimePeriods(prevChange, newChange) {
   return true;
 }
 
-function shouldCalcSimilar(prevChange, newChange) {
+function shouldCalcSimilar(prevChange,newChange) {
 //-----------------------------------------------------------------------------
 // Check for Should Calc Similar
 // Always Returns true
@@ -694,7 +661,6 @@ function AllTrim(value) {
   return LTrim(RTrim(value));
 }
 
-
 function DOut(oDate) {
 //-----------------------------------------------------------------------------
 // Formats Date Object to a readable string
@@ -702,24 +668,53 @@ function DOut(oDate) {
   Date.prototype.getDayName   = function() {return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][this.getDay()];}
   Date.prototype.getMonthName = function() {return ['January','February','March','April','May','June','July','August','September','October','November','December'][this.getMonth()];}
   dDate = new Date(parseInt(oDate)); 
-  nTZH = dDate.getTimezoneOffset() / 60 ;
-  sTZN = (nTZH == 8) ? "PST" : "PDT";
+  nTZH  = dDate.getTimezoneOffset() / 60 ;
+  sTZN  = (nTZH == 8) ? "PST" : "PDT";
   dDate.setHours(dDate.getHours() + nTZH); 
-  sAorP = (dDate.getHours()<12) ? "AM" : "PM";
+  sAorP    = (dDate.getHours()<12) ? "AM" : "PM";
   sHours   = dDate.getHours()   ; sHours   = (sHours   < 10) ? "0"+sHours   : sHours;
   sMinutes = dDate.getMinutes() ; sMinutes = (sMinutes < 10) ? "0"+sMinutes : sMinutes;
   sSeconds = dDate.getSeconds() ; sSeconds = (sSeconds < 10) ? "0"+sSeconds : sSeconds;
-  sReturn =  dDate.getDayName()+", ";
+  sReturn  = dDate.getDayName()+", ";
   sReturn += dDate.getMonthName()+" "+dDate.getDate()+", "+dDate.getFullYear()+", ";
   sReturn += sHours+":"+sMinutes+":"+sSeconds+" "+sAorP+" ("+sTZN+")";
-  bLogIt = false;
-  if(bLogIt) {
-    logger.info(" - nTZH    -> " + nTZH); 
-    logger.info(" - sTZN    -> " + sTZN); 
-    logger.info(" - sAorP   -> " + sAorP); 
-    logger.info(" - oDate   -> " + oDate); 
-    logger.info(" - dDate   -> " + dDate);
-    logger.info(" - sReturn -> " + sReturn);
-  }
+  bLogIt = false;if(bLogIt) {logger.info(" - nTZH    -> "+nTZH);logger.info(" - sTZN    -> "+sTZN);logger.info(" - sAorP   -> "+sAorP);logger.info(" - oDate   -> "+oDate);logger.info(" - dDate   -> "+dDate);logger.info(" - sReturn -> "+sReturn);}
   return sReturn;
+}
+
+function MsgCompile(saEvtText,saActText,saActFont,saEvtTable) {
+//-----------------------------------------------------------------------------
+// Formats Date Object to a readable string
+//-----------------------------------------------------------------------------
+  if(saActFont==null) {saActFont="";}
+  if(saEvtTable==null) {saEvtTable="";}
+
+  srMsg =  "<br>";
+  srMsg += "<table class=\"textfont\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">";
+  srMsg += " <tbody>";
+  srMsg += "  <tr><th class=\"hl\" align=\"left\">RFC Event</th></tr>";
+  srMsg += "  <tr><th class=\"space\" align=\"left\"></th></tr>";
+  srMsg += "	</tbody>";
+  srMsg += "</table>";
+  srMsg += "<table class=\"textfont\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">";
+  srMsg += "  <tr><td class=\"descr\">"+saEvtText+"</td></tr>";
+  srMsg += "</table>";
+  srMsg += "<br>";
+  if (!saEvtTable.equals("")) {
+    srMsg += saEvtTable;
+  }
+  srMsg += "<table class=\"textfont\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">";
+  srMsg += " <tbody>";
+  if (saActFont.equals("")) {
+    srMsg += "  <tr><th class=\"hl\" align=\"left\">RFC Action Needed</th></tr>";
+  } else {
+    srMsg += "  <tr><th class=\"hl\" align=\"left\"><font color=\""+saActFont+"\">RFC Action Needed</font></th></tr>";
+  }
+  srMsg += "  <tr><th class=\"space\" align=\"left\"></th></tr>";
+  srMsg += "	</tbody>";
+  srMsg += "</table>";
+  srMsg += "<table class=\"textfont\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">";
+  srMsg += "  <tr><td class=\"descr\">"+saActText+"</td></tr>";
+  srMsg += "</table>";
+  return srMsg;
 }
