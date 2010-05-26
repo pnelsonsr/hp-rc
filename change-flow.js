@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------
 // name......:  change-flow.js
-// version...:  0.1.14
-// revision..:  2010-134
+// version...:  0.1.15
+// revision..:  2010-137
 // -------------------------------------------------------------------------------------
 //  Functions for RFC Notification 
 // -------------------------------------------------------------------------------------
@@ -12,7 +12,7 @@ importPackage(Packages.java.util);
 //-----------------------------------------------------------------------------
 // Variable Assignment Begin
 //-----------------------------------------------------------------------------
-var VERSION                      = "0.1.14 -> 2010-134";
+var VERSION                      = "0.1.15 -> 2010-137";
 var USE_CASE_1_HEADER            = "Notification Event Use Case 1 - Assignment Change <br> ";
 var ASSIGN_CHANGE_HEADER         = "<br><b>Event: </b> RFC <b><u>Assignment Change</u></b> has occurred.<br><br>";
 var ASSIGN_CHANGE_FOOTER         = "<br><br><b>Action: </b> Please take note that this assignment change has taken place and <b><u>you may have a task to complete.</u></b>";
@@ -22,8 +22,6 @@ var RFC_PEND_APP_TO_SCHED_HEADER = "<br><b>Event: </b> The RFC has been <b><u>Ap
 var RFC_PEND_APP_TO_SCHED_FOOTER = "<br><br><b>Action: </b> As the <b><u>Change Owner</u></b>, please take note that your change has been <b><u>Approved</u></b>.  As the <b><u>Change Implementor</u></b>, please take note of the <b><u>Planned Start Date</u></b> and plan accordingly.";
 var RFC_NEW_TO_SCHED_HEADER      = "<br><b>Event: </b> The Standard RFC has been <b><u>Scheduled</u></b> for implementation.";
 var RFC_NEW_TO_SCHED_FOOTER      = "<br><br><b>Action: </b>As the <b><u>Change Implementor</u></b>, please take note of the <b><u>Planned Start Date</u></b> and plan accordingly.";
-var RFC_NEW_TO_OPEN_HEADER       = "<br><b>Event: </b> A new RFC has transitioned from <b><u>New</u></b> to <b><u>Open.</u></b>";
-var RFC_NEW_TO_OPEN_FOOTER       = "<br><br><b>Action: </b> As the Change Team Lead identified for this RFC, please <b><u>assess the change and prepare it for review.</u></b>";
 var RFC_SCHED_TO_IMP_HEADER      = "<br><b>Event: </b> The RFC phase has changed from <b><u>Scheduled</u></b> to <b><u>Implemented.</u></b>";
 var RFC_SCHED_TO_IMP_FOOTER      = "<br><br><b>Action: </b> As the Change Owner, please validate the RFC has been implemented as expected and then <b><u>Close</u></b> it.";
 var RFC_IMP_TO_CLOSE_HEADER      = "<br><b>Event: </b> The RFC phase has changed from <b><u>Implemented</u></b> to <b><u>Closed.</u></b>";
@@ -329,19 +327,55 @@ function notifyNewToOpen(prevChange, newChange,  notificationContext) {
 //-----------------------------------------------------------------------------
   sLog = newChange.getField("request-id");
   logger.info(sLog + " ### notifyNewToOpen Entry ###");
-  if (newChange.getField("category").equalsIgnoreCase("Normal") || newChange.getField("category").equalsIgnoreCase("Emergency")) {
-    if (prevChange == null && newChange.getField("status") == STATUS_OPEN) {
-      logger.info(" - category -> Normal or Emergency AND prev status -> null AND new status -> Open");
-      message = RFC_NEW_TO_OPEN_HEADER + RFC_NEW_TO_OPEN_FOOTER;
-      if (newChange.getField("cnw-team-lead-account") != null) {
-        logger.info(" - adding cnw-team-lead-account to notification -> " + newChange.getField("cnw-team-lead-account"));
-        notificationContext.addUser(newChange.getField("cnw-team-lead-account"));
-        notificationContext.setMessage(message);
-        logger.info(" ### notifyNewToOpen Exit true ###");
-        return true;
-      } else {
-        logger.info(" # ERROR # cnw-team-lead-account is null -> Cancelling new to open notification!");
+  sNewPhase = newChange.getField("category") ; sNewStatus = newChange.getField("status");
+  if (sNewPhase.equals("Normal") || sNewPhase.equals("Emergency")) {
+    if (prevChange == null && sNewStatus == STATUS_OPEN) {
+      bNoCTL = false ; aField = ["cnw-team-lead-account","cnw-originator-account","cnw-initiated-by-account"];
+      for( i=0 ; i<aField.length ; i++ ) {
+        sData = AllTrim(newChange.getField(aField[i]));
+        if (!(sData.equals(null) || sData.equals(""))) {
+          logger.info(" - adding "+aField[i]+" to notification -> " + sData) ; notificationContext.addUser(sData);
+        } else {
+          logger.info(" # ERROR # "+aField[i]+" is null");
+          if (i==0) {bNoCTL = true;}
+        }
       }
+      if (bNoCTL) {
+        sCTLText = "There was NO <b>Change Team Lead</b> identified for this RFC.  One needs to be identified to assess the RFC and prepare it for review.";
+      } else {
+        sData = AllTrim(newChange.getField("cnw-change-manager"));
+        sCTLText = "The <b>Change Team Lead</b> ("+sData+") identified for this RFC needs to <b><u>assess the change and prepare it for review</u>.";
+      }
+      sMsg =  "<br>";
+			sMsg += "<table class=\"textfont\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">";
+      sMsg += " <tbody>";
+      sMsg += "  <tr><th class=\"hl\" align=\"left\">RFC Event</th></tr>";
+      sMsg += "  <tr><th class=\"space\" align=\"left\"></th></tr>";
+      sMsg += "	</tbody>";
+      sMsg += "</table>";
+      sMsg += "<table class=\"textfont\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">";
+      sMsg += " <tbody>";
+      sMsg += "  <tr><td class=\"descr\">A new RFC has transitioned from <b><u>New</u></b> to <b><u>Open.</u></td></tr>";
+      sMsg += "  <tr><td></td></tr>";
+      sMsg += "	</tbody>";
+      sMsg += "</table>";
+      sMsg += "<br>";
+      sMsg += "<table>";
+			sMsg += "<table class=\"textfont\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">";
+      sMsg += " <tbody>";
+      sMsg += "  <tr><th class=\"hl\" align=\"left\">RFC Action Needed</th></tr>";
+      sMsg += "  <tr><th class=\"space\" align=\"left\"></th></tr>";
+      sMsg += "	</tbody>";
+      sMsg += "</table>";
+      sMsg += "<table class=\"textfont\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">";
+      sMsg += " <tbody>";
+      sMsg += "  <tr><td class=\"descr\">"+sCTLText+"</td></tr>";
+      sMsg += "  <tr><td></td></tr>";
+      sMsg += "	</tbody>";
+      sMsg += "</table>";
+      notificationContext.setMessage(sMsg);
+      logger.info(" ### notifyNewToOpen Exit true ###");
+      return true;
     }
   }
   logger.info(sLog + " ### notifyNewToOpen Exit false ###");
@@ -653,7 +687,7 @@ function RTrim(value) {
   return value.replaceAll(re, "$1");
 }
 
-function localTrim(value) {
+function AllTrim(value) {
 //-----------------------------------------------------------------------------
 // Removes leading and ending whitespaces
 //-----------------------------------------------------------------------------
