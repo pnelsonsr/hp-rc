@@ -1,6 +1,6 @@
 // -------------------------------------------------------------------------------------
    name      =  "change-flow.js" ;
-   version   =  "0.1.22b1"       ;
+   version   =  "0.2.1"       ;
    revision  =  "2010-145"       ;
 // -------------------------------------------------------------------------------------
 //  Functions for RFC Notification 
@@ -270,9 +270,6 @@ function notifyApprovalRequested(oaOld,oaNew,oaNotify) {
             bAdded = true;
           }
         }
-        //--------------------------------------
-        // insert ECAB & Emergency CAB DL Begin
-        //--------------------------------------
         if ( oNewCAB.equals("Enterprise") ) {
           aFAGrps = oaNew.getField("approvals-required").split(",");
           for ( i=0 ; i<aFAGrps.length ; i++ ) {
@@ -289,9 +286,6 @@ function notifyApprovalRequested(oaOld,oaNew,oaNotify) {
           oaNotify.addUser(sCABDL);
           bAdded = true;
         }
-        //------------------------------------
-        // insert ECAB & Emergency CAB DL End
-        //------------------------------------
         if (bAdded) {
           sEvtText = "The RFC <b>requires approval</b> from your team!";
           sActText = "As a designated <b>Change Approver</b> for your team, please <b>review the RFC for approval</b>.";
