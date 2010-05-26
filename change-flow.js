@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------
 // name......:  change-flow.js
-// version...:  0.1.13
-// revision..:  2010-112
+// version...:  0.1.14
+// revision..:  2010-134
 // -------------------------------------------------------------------------------------
 //  Functions for RFC Notification 
 // -------------------------------------------------------------------------------------
@@ -12,7 +12,7 @@ importPackage(Packages.java.util);
 //-----------------------------------------------------------------------------
 // Variable Assignment Begin
 //-----------------------------------------------------------------------------
-var VERSION                      = "0.1.13 -> 2010-112";
+var VERSION                      = "0.1.14 -> 2010-134";
 var USE_CASE_1_HEADER            = "Notification Event Use Case 1 - Assignment Change <br> ";
 var ASSIGN_CHANGE_HEADER         = "<br><b>Event: </b> RFC <b><u>Assignment Change</u></b> has occurred.<br><br>";
 var ASSIGN_CHANGE_FOOTER         = "<br><br><b>Action: </b> Please take note that this assignment change has taken place and <b><u>you may have a task to complete.</u></b>";
@@ -143,7 +143,7 @@ function shouldCalcCollision(prevChange, newChange) {
 
 function addActionItemsOnChange(prevChange, newChange, actionItemsContext) {
 //--------------------------------------------------------------------------
-// Returns falst for every call
+// Returns false for every call
 //--------------------------------------------------------------------------
   return false;
 }
@@ -157,6 +157,7 @@ function getUsersToNotify(prevChange, newChange, notificationContext) {
   logger.info(sLog + " - version " + VERSION);
   result = false;
   if (!result) {result = notifyCancelled                  (prevChange,newChange,notificationContext);}
+  if (!result) {result = notifyPlannedStartEnd            (prevChange,newChange,notificationContext);}
   if (!result) {result = notifyApprovalRequested          (prevChange,newChange,notificationContext);}
   if (!result) {result = notifyNewToOpen                  (prevChange,newChange,notificationContext);}
   if (!result) {result = notifyNewToScheduled             (prevChange,newChange,notificationContext);}
@@ -189,6 +190,95 @@ function notifyCancelled(prevChange, newChange, notificationContext) {
     }
   }
   logger.info(sLog+" ### notifyCancelled Exit false ###");
+  return false;
+}
+
+function notifyPlannedStartEnd(prevChange, newChange, notificationContext) {
+//-----------------------------------------------------------------------------
+// Notification for Change Planned Start/End Date-Time Changed
+//-----------------------------------------------------------------------------
+  sLog = newChange.getField("request-id");
+  logger.info(sLog + " ### notifyPlannedDate Entry ###");
+  sNewStatus = newChange.getField("status") ; sOldStatus = (prevChange!=null) ? prevChange.getField("status") : "";
+  if (prevChange!=null && sNewStatus.equals(sOldStatus)) {
+    oPSNew = newChange.getField("planned-start-time") ; oPSOld = prevChange.getField("planned-start-time");
+    oPENew = newChange.getField("planned-end-time")   ; oPEOld = prevChange.getField("planned-end-time");
+    if (!oPSNew.equals(oPSOld) || !oPENew.equals(oPEOld)) {
+      bAdd = false;
+      if (sNewStatus==STATUS_OPEN || sNewStatus==STATUS_PENDING_APPROVAL || sNewStatus==STATUS_PENDING_ACCEPTANCE || sNewStatus==STATUS_SCHEDULED) {
+        aField = ["cnw-originator-account","cnw-initiated-by-account","cnw-change-owner-account"];
+        for( i=0 ; i<aField.length ; i++ ) {
+          sData = newChange.getField(aField[i]) ; logger.info(" - adding "+aField[i]+" to notification -> " + sData) ; notificationContext.addUser(sData);
+        }
+        bAdd = true;
+      }
+      if (sNewStatus==STATUS_PENDING_APPROVAL || sNewStatus==STATUS_PENDING_ACCEPTANCE) {
+        sField = "cnw-change-owner-account"; 
+        sData = newChange.getField(sField) ; logger.info(" - adding "+sField+" to notification -> " + sData) ; notificationContext.addUser(sData);
+      }
+      if (sNewStatus==STATUS_SCHEDULED) {
+        aField = ["cnw-implementor-account","cw-implementing-team"];
+        for( i=0 ; i<aField.length ; i++ ) {
+          sData = newChange.getField(aField[i]);
+          if (sData!=null) {
+            logger.info(" - adding "+aField[i]+" to notification -> " + sData) ; notificationContext.addUser(sData);
+          }
+        }
+      }
+      if (bAdd) {
+        sMsg =  "<br>";
+  			sMsg += "<table class=\"textfont\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">";
+        sMsg += " <tbody>";
+        sMsg += "  <tr><th class=\"hl\" align=\"left\">RFC Event</th></tr>";
+        sMsg += "  <tr><th class=\"space\" align=\"left\"></th></tr>";
+        sMsg += "	</tbody>";
+        sMsg += "</table>";
+        sMsg += "<table class=\"textfont\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">";
+        sMsg += " <tbody>";
+        sMsg += "  <tr><td class=\"descr\">The <b><u>Planned Start/End</b></u> of the RFC has <b>changed</b>!</td></tr>";
+        sMsg += "  <tr><td></td></tr>";
+        sMsg += "	</tbody>";
+        sMsg += "</table>";
+        sMsg += "<br>";
+        sMsg += "<table>";
+        if(!oPSNew.equals(oPSOld)) {
+          sMsg += "<tr><td class=\"chl\" width=\"25%\">New Planned Start:</td>      <td class=\"ctext\">"+DOut(oPSNew)+"</td></tr>";
+          sCorP = "Previous";
+        } else {
+          sCorP = "Current";
+        }
+        sMsg += "<tr><td class=\"chl\" width=\"25%\">"+sCorP+" Planned Start:</td> <td class=\"ctext\">"+DOut(oPSOld)+"</td></tr>";
+        sMsg += "<tr><td>&nbsp;</td></tr>";
+        if(!oPENew.equals(oPEOld)) {
+          sMsg += "<tr><td class=\"chl\" width=\"25%\">New Planned End:</td>        <td class=\"ctext\">"+DOut(oPENew)+"</td></tr>";
+          sCorP = "Previous";
+        } else {
+          sCorP = "Current";
+        }
+        sMsg += "<tr><td class=\"chl\" width=\"25%\">"+sCorP+" Planned End:</td>   <td class=\"ctext\">"+DOut(oPEOld)+"</td></tr>";
+        sMsg += "</table>";
+        sMsg += "<br>";
+  			sMsg += "<table class=\"textfont\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">";
+        sMsg += " <tbody>";
+        sMsg += "  <tr><th class=\"hl\" align=\"left\">RFC Action Needed</th></tr>";
+        sMsg += "  <tr><th class=\"space\" align=\"left\"></th></tr>";
+        sMsg += "	</tbody>";
+        sMsg += "</table>";
+        sMsg += "<table class=\"textfont\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">";
+        sMsg += " <tbody>";
+        sMsg += "  <tr><td class=\"descr\">As a person or team associated to this RFC, please take note of the change in date and <b><u>plan accordingly</u></b>.</td></tr>";
+        sMsg += "  <tr><td></td></tr>";
+        sMsg += "	</tbody>";
+        sMsg += "</table>";
+        notificationContext.setMessage(sMsg);
+        logger.info(sLog + " ### notifyPlannedDate Exit true ###");
+        return true;
+      }
+    }
+  } else {
+    logger.info(" - Start/End has changed but phase has changed also which has precedence -> exiting");
+  }
+  logger.info(sLog + " ### notifyPlannedDate Exit false ###");
   return false;
 }
 
@@ -568,4 +658,34 @@ function localTrim(value) {
 // Removes leading and ending whitespaces
 //-----------------------------------------------------------------------------
   return LTrim(RTrim(value));
+}
+
+
+function DOut(oDate) {
+//-----------------------------------------------------------------------------
+// Formats Date Object to a readable string
+//-----------------------------------------------------------------------------
+  Date.prototype.getDayName   = function() {return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][this.getDay()];}
+  Date.prototype.getMonthName = function() {return ['January','February','March','April','May','June','July','August','September','October','November','December'][this.getMonth()];}
+  dDate = new Date(parseInt(oDate)); 
+  nTZH = dDate.getTimezoneOffset() / 60 ;
+  sTZN = (nTZH == 8) ? "PST" : "PDT";
+  dDate.setHours(dDate.getHours() + nTZH); 
+  sAorP = (dDate.getHours()<12) ? "AM" : "PM";
+  sHours   = dDate.getHours()   ; sHours   = (sHours   < 10) ? "0"+sHours   : sHours;
+  sMinutes = dDate.getMinutes() ; sMinutes = (sMinutes < 10) ? "0"+sMinutes : sMinutes;
+  sSeconds = dDate.getSeconds() ; sSeconds = (sSeconds < 10) ? "0"+sSeconds : sSeconds;
+  sReturn =  dDate.getDayName()+", ";
+  sReturn += dDate.getMonthName()+" "+dDate.getDate()+", "+dDate.getFullYear()+", ";
+  sReturn += sHours+":"+sMinutes+":"+sSeconds+" "+sAorP+" ("+sTZN+")";
+  bLogIt = false;
+  if(bLogIt) {
+    logger.info(" - nTZH    -> " + nTZH); 
+    logger.info(" - sTZN    -> " + sTZN); 
+    logger.info(" - sAorP   -> " + sAorP); 
+    logger.info(" - oDate   -> " + oDate); 
+    logger.info(" - dDate   -> " + dDate);
+    logger.info(" - sReturn -> " + sReturn);
+  }
+  return sReturn;
 }
