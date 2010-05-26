@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------
    name      =  "change-flow.js" ;
-   version   =  "0.1.22a1"       ;
-   revision  =  "2010-142"       ;
+   version   =  "0.1.22b1"       ;
+   revision  =  "2010-145"       ;
 // -------------------------------------------------------------------------------------
 //  Functions for RFC Notification 
 // -------------------------------------------------------------------------------------
@@ -12,11 +12,7 @@ importPackage(Packages.java.util);
 //-----------------------------------------------------------------------------
 // Variable Assignment Begin
 //-----------------------------------------------------------------------------
-var USE_CASE_1_HEADER            = "Notification Event Use Case 1 - Assignment Change <br> ";
-var RFC_APP_DEV_HEADER           = "<br><b>Event: </b> Voting is complete, and this RFC has been ";
-var RFC_APP_DEV_FOOTER           = "<br><br><b>Action: </b> As the Change Owner, please take note of the voting result.";
-var RFC_PAST_IMP_DATE_HEADER     = "<br><b>Event: </b> The RFC is 3 days beyonds its <b><u>Planned End Date</u></b> and is not yet closed.";
-var RFC_PAST_IMP_DATE_FOOTER     = "<br><br><b>Action: </b> As the Change Owner, please <b><u>Close</u></b> the RFC or update the Planned End Date.";
+
 //--------------------------
 // Variable Assignment End
 //--------------------------
@@ -46,7 +42,7 @@ function shouldAnalyze(oaOld,oaNew) {
   if (oaNew.isTicketAnalyzer()) {
     bResult = true;
   }
-  if (!result) {
+  if (!bResult) {
     bResult = !(oaNew.isAnalysisRulesEqual(oaOld));
   }
   logger.info(sLog + " *** shouldAnalyze Exit " + bResult + " ***");
@@ -261,25 +257,41 @@ function notifyApprovalRequested(oaOld,oaNew,oaNotify) {
 //-----------------------------------------------------------------------------
   sLog = oaNew.getField("request-id");
   logger.info(sLog+" ### notifyApprovalRequested Entry ###");
-  oNewType = oaNew.getField("category") ; oNewPhase = oaNew.getField("status") ; oOldPhase = (oaOld==null) ? "" : oaOld.getField("status"); 
+  oNewType = oaNew.getField("category") ; oNewPhase = oaNew.getField("status") ; oOldPhase = (oaOld==null) ? "" : oaOld.getField("status") ; oNewCAB = oaNew.getField("cnw-cab-level");
   if (oNewType.equals("Normal") || oNewType.equals("Emergency") || oNewType.equals("Standard")) {
     if ( oaOld==null || !oOldPhase.equals(STATUS_PENDING_APPROVAL) ) {
       if ( oNewPhase.equals(STATUS_PENDING_APPROVAL) ) {
         bAdded = false;
-        aAGrps = oaNew.getField("cnw-pending-approval-groups").split(",");
-        for ( i=0 ; i<aAGrps.length ; i++ ) {
-          if ( !(aAGrps[i].equals(null) || aAGrps[i].equals("")) ) {
-            logger.info(" - adding Approval Group to notification -> " + aAGrps[i]);
-            oaNotify.addUser(aAGrps[i]);
+        aPAGrps = oaNew.getField("cnw-pending-approval-groups").split(",");
+        for ( i=0 ; i<aPAGrps.length ; i++ ) {
+          if ( !(aPAGrps[i].equals(null) || aPAGrps[i].equals("")) ) {
+            logger.info(" - adding Pending Approval Group to notification -> " + aPAGrps[i]);
+            oaNotify.addUser(aPAGrps[i]);
             bAdded = true;
           }
         }
-        if ( oaNew.getField("cnw-cab-level").equals("Enterprise") ) {
-          sECabDL = "CA - IT ITSM Enterprise CAB";
-          logger.info(" - adding ECAB Approval Group to notification -> " + sECabDL);
-          oaNotify.addUser(sECabDL);
+        //--------------------------------------
+        // insert ECAB & Emergency CAB DL Begin
+        //--------------------------------------
+        if ( oNewCAB.equals("Enterprise") ) {
+          aFAGrps = oaNew.getField("approvals-required").split(",");
+          for ( i=0 ; i<aFAGrps.length ; i++ ) {
+            if ( !(aFAGrps[i].equals(null) || aFAGrps[i].equals("")) ) {
+              logger.info(" - adding Future Approval Group to notification -> " + aFAGrps[i]);
+              oaNotify.addUser(aFAGrps[i]);
+              bAdded = true;
+            }
+          }
+        }
+        if ( oNewType.equals("Emergency") && oNewCAB.equals("Team") ) {
+          sCABDL = "CA - IT ITSM Emergency CAB";
+          logger.info(" - adding Emergency CAB DL to notification -> " + sCABDL);
+          oaNotify.addUser(sCABDL);
           bAdded = true;
         }
+        //------------------------------------
+        // insert ECAB & Emergency CAB DL End
+        //------------------------------------
         if (bAdded) {
           sEvtText = "The RFC <b>requires approval</b> from your team!";
           sActText = "As a designated <b>Change Approver</b> for your team, please <b>review the RFC for approval</b>.";
@@ -321,8 +333,7 @@ function notifyNewToOpen(oaOld,oaNew,oaNotify) {
       if (bNoCTL) {
         sActText = "There was NO <b>Change Team Lead</b> identified for this RFC.  One needs to be identified to assess the RFC and prepare it for review.";
       } else {
-        sActText = "The <b>Change Team Lead</b> ("+oaNew.getField("cnw-change-manager")+") identified for this RFC needs to <b>taka gander at da RFC an pare'it fur raview.";
-        //sActText = "The <b>Change Team Lead</b> ("+oaNew.getField("cnw-change-manager")+") identified for this RFC needs to <b><u>assess the RFC and prepare it for review</u>.";
+        sActText = "The <b>Change Team Lead</b> ("+oaNew.getField("cnw-change-manager")+") identified for this RFC needs to <b>assess the RFC and prepare it for review.";
       }
       oaNotify.setMessage(MsgCompile(sEvtText,sActText,sActFont));
       logger.info(" ### notifyNewToOpen Exit true ###");
@@ -453,7 +464,7 @@ function notifyScheduledToImplemented(oaOld,oaNew,oaNotify) {
   logger.info(sLog + " ### notifyScheduledToImplemented Entry ###");
   oNewType = oaNew.getField("category") ; oNewPhase = oaNew.getField("status") ; oOldPhase = (oaOld==null) ? "" : oaOld.getField("status"); 
   if ( oNewType.equals("Normal") || oNewType.equals("Emergency") || oNewType.equals("Standard") ) {
-    if ( oaOld!=null && oNewPhase(STATUS_IMPLEMENTED) && oOldPhase.equals(STATUS_SCHEDULED) ) {
+    if ( oaOld!=null && oNewPhase.equals(STATUS_IMPLEMENTED) && oOldPhase.equals(STATUS_SCHEDULED) ) {
       sName  = oaNew.getField("contact-person");
       sField = "cnw-change-owner-account";
 	  sData  = oaNew.getField(sIAField); 
@@ -482,10 +493,10 @@ function notifyImplementedToClosed(oaOld,oaNew,oaNotify) {
   logger.info(sLog + " ### notifyImplementedToClosed Entry ###");
   oNewType = oaNew.getField("category") ; oNewPhase = oaNew.getField("status") ; oOldPhase = (oaOld==null) ? "" : oaOld.getField("status"); 
   if ( oNewType.equals("Normal") || oNewType.equals("Emergency") || oNewType.equals("Standard") ) {
-    if ( oaOld!=null && oNewPhase(STATUS_CLOSED) && oOldPhase.equals(STATUS_IMPLEMENTED) ) {
+    if ( oaOld!=null && oNewPhase.equals(STATUS_CLOSED) && oOldPhase.equals(STATUS_IMPLEMENTED) ) {
       sName  = oaNew.getField("contact-person");
       sField = "cnw-change-owner-account";
-	  sData  = oaNew.getField(sIAField); 
+      sData  = oaNew.getField(sIAField);    
       if ( !(sData.equals(null) || sData.equals("")) ) {
         sTitle    = "Change Owner";
         sTFill    = sName;
@@ -514,7 +525,7 @@ function notifyTypeChanged(oaOld,oaNew,oaNotify) {
     if ( oaOld!=null && !oNewType.equals(oOldType) ) {
       sName  = oaNew.getField("contact-person");
       sField = "cnw-change-owner-account";
-	  sData  = oaNew.getField(sIAField); 
+      sData  = oaNew.getField(sField); 
       if ( !(sData.equals(null) || sData.equals("")) ) {
         sTitle    = "Change Owner";
         sTFill    = sName;
@@ -540,7 +551,7 @@ function notifyAssignmentChanged(oaOld,oaNew,oaNotify) {
   logger.info(sLog + " ### notifyAssignmentChanged Entry ###");
   oNewAT  = oaNew.getField("cnw-assigned-to") ; oOldAT  = (oaOld==null) ? "" : oaOld.getField("cnw-assigned-to"); 
   if ( oaOld!=null && !(oNewAT.equals(null) || oNewAT.equals("") || oOldAT.equals(null) || oOldAT.equals("")) ) {
-    sName = oaNew.getField("cnw-assigned-to") ; sField = "cnw-assigned-to-account" ; sData = oaNew.getField(sIAField); 
+    sName = oaNew.getField("cnw-assigned-to") ; sField = "cnw-assigned-to-account" ; sData = oaNew.getField(sField); 
     if ( !(sData.equals(null) || sData.equals("")) ) {
       sTitle    = "Assigned To";
       sTFill    = sName;
