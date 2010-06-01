@@ -1,7 +1,17 @@
-1. Standardize code functions.
-2. Rename vars based on standardization.
-3. Remove unused functions.
-4. Remove unused vars.
-5. Add ECAB Notification.
-6. Any other notification events anyone?
-7. Yeah what have you got?
+#===============================================================================
+# Code Jock..: Patrick Nelson
+# Version....: 0.1.2
+# Revision...: 2010-147
+#-------------------------------------------------------------------------------
+# ToDo list for change-flow project
+#===============================================================================
+  - assigned to nt field is not updated on a change to it assigned to
+X - Add IsNotBlank() function
+  - Need for oaOld!=null (line 5) 
+  - Move sCABDL up to var area
+  - Fix notifyApprovalRequest oaOld==null line (line 5) <- not needed?
+X - Add ECAB Notification.
+X - Remove unused vars.
+X - Remove unused functions.
+X - Rename vars based on standardization.
+X - Standardize code functions.
