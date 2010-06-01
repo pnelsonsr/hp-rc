@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------
    name      =  "change-flow.js" ;
-   version   =  "0.2.2c1"        ;
-   revision  =  "2010-148"       ;
+   version   =  "0.2.2c2"        ;
+   revision  =  "2010-152"       ;
 // -------------------------------------------------------------------------------------
 //  Functions for RFC Notification 
 // -------------------------------------------------------------------------------------
@@ -458,7 +458,6 @@ function notifyScheduledToImplemented(oaOld,oaNew,oaNotify) {
   oNewType = oaNew.getField("category") ; oNewPhase = oaNew.getField("status") ; oOldPhase = (oaOld==null) ? "" : oaOld.getField("status"); 
   if ( oNewType.equals("Normal") || oNewType.equals("Emergency") || oNewType.equals("Standard") ) {
     if ( (oaOld!=null) && (oNewPhase.equals(STATUS_IMPLEMENTED)) && (oOldPhase.equals(STATUS_SCHEDULED)) ) {
-      sName  = oaNew.getField("contact-person");
       sField = "cnw-change-owner-account" ; sName = oaNew.getField("contact-person") ; sData = oaNew.getField(sField);    
       if ( isNotBlank(sData) ) {
         logger.info(" - adding "+sField+" to notification -> " + sData) ; oaNotify.addUser(sData);
