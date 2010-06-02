@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------
    name      =  "change-flow.js" ;
-   version   =  "0.2.2c2"        ;
-   revision  =  "2010-152"       ;
+   version   =  "0.2.3a1"        ;
+   revision  =  "2010-153"       ;
 // -------------------------------------------------------------------------------------
 //  Functions for RFC Notification 
 // -------------------------------------------------------------------------------------
@@ -134,6 +134,7 @@ function getUsersToNotify(oaOld,oaNew,oaNotify) {
   if (!bResult) {bResult = notifyCancelled                  (oaOld,oaNew,oaNotify);}
   if (!bResult) {bResult = notifyPlannedStartEnd            (oaOld,oaNew,oaNotify);}
   if (!bResult) {bResult = notifyApprovalRequested          (oaOld,oaNew,oaNotify);}
+  if (!bResult) {bResult = notifyAcceptanceRequested        (oaOld,oaNew,oaNotify);}
   if (!bResult) {bResult = notifyNewToOpen                  (oaOld,oaNew,oaNotify);}
   if (!bResult) {bResult = notifyNewToScheduled             (oaOld,oaNew,oaNotify);}
   if (!bResult) {bResult = notifyPendingApprovalToScheduled (oaOld,oaNew,oaNotify);}
@@ -155,15 +156,25 @@ function notifyCancelled(oaOld,oaNew,oaNotify) {
     oNewRO = oaNew.getField("review-outcome");
     if ( oNewRO.equals(OUTCOME_WITHDRAWN) || oNewRO.equals(OUTCOME_CANCELLED) ) {
       bAdded = false;
-      aField = ["cnw-originator-account","cnw-initiated-by-account","cnw-change-owner-account","cnw-implementor-account"];
+      aField = ["cnw-originator-account","cnw-initiated-by-account","cnw-change-owner-account"];
       for( i=0 ; i<aField.length ; i++ ) {
         sData = oaNew.getField(aField[i]);
         if ( isNotBlank(sData) ) {
-          logger.info(" - adding "+aField[i]+" to notification -> " + sData) ; oaNotify.addUser(sData);
-          bAdded = true;
+          logger.info(" - adding "+aField[i]+" to notification -> " + sData) ; oaNotify.addUser(sData) ; bAdded = true;
         } else {
           logger.info(" # ERROR # "+aField[i]+" is null");
         }
+      }
+      bImpAdd  = false;
+      sIAField = "cnw-implementor-account" ; sIAData = oaNew.getField(sIAField); 
+      sITField = "cw-implementing-team"    ; sITData = oaNew.getField(sITField);
+      if ( isNotBlank(sIAData) ) {
+        bImpAdd = true ; sField = sIAField ; sData = sIAData ; bAdded = true; 
+      } else if ( isNotBlank(sITData) ) {
+        bImpAdd = true ; sField = sITField ; sData = sITData ; bAdded = true; 
+      }
+      if (bImpAdd) {
+        logger.info(" - adding "+sField+" to notification -> " + sData) ; oaNotify.addUser(sData);
       }
       if (bAdded) {
         sEvtText = "The RFC has been <b><u>Cancelled</u></b>!";
@@ -203,14 +214,14 @@ function notifyPlannedStartEnd(oaOld,oaNew,oaNotify) {
       }
       if ( oNewPhase.equals(STATUS_PENDING_APPROVAL) || oNewPhase.equals(STATUS_PENDING_ACCEPTANCE) ) {
         sField = "cnw-change-owner-account"; 
-        sData = oaNew.getField(sField) ; logger.info(" - adding "+sField+" to notification -> " + sData) ; oaNotify.addUser(sData);
+        sData = oaNew.getField(sField) ; logger.info(" - adding "+sField+" to notification -> " + sData) ; oaNotify.addUser(sData) ; bAdded = true;
       }
       if ( oNewPhase.equals(STATUS_SCHEDULED) ) {
         aField = ["cnw-implementor-account","cw-implementing-team"];
         for( i=0 ; i<aField.length ; i++ ) {
           sData = oaNew.getField(aField[i]);
           if ( isNotBlank(sData) ) {
-            logger.info(" - adding "+aField[i]+" to notification -> " + sData) ; oaNotify.addUser(sData);
+            logger.info(" - adding "+aField[i]+" to notification -> " + sData) ; oaNotify.addUser(sData) ; bAdded = true;
           }
         }
       }
@@ -253,38 +264,28 @@ function notifyPlannedStartEnd(oaOld,oaNew,oaNotify) {
 
 function notifyApprovalRequested(oaOld,oaNew,oaNotify) {
 //-----------------------------------------------------------------------------
-// Notification for cnw-pending-approval-groups
+// Notification for cnw-pending-approval-groups -> Normal & Emergency
 //-----------------------------------------------------------------------------
   sLog = oaNew.getField("request-id");
   logger.info(sLog+" ### notifyApprovalRequested Entry ###");
   oNewType = oaNew.getField("category") ; oNewPhase = oaNew.getField("status") ; oOldPhase = (oaOld==null) ? "" : oaOld.getField("status") ; oNewCAB = oaNew.getField("cnw-cab-level");
-  if (oNewType.equals("Normal") || oNewType.equals("Emergency") || oNewType.equals("Standard")) {
+  if ( oNewType.equals("Normal") || oNewType.equals("Emergency") || oNewType.equals("Standard")) {
     if ( oaOld==null || !oOldPhase.equals(STATUS_PENDING_APPROVAL) ) {
       if ( oNewPhase.equals(STATUS_PENDING_APPROVAL) ) {
         bAdded = false;
         aPAGrps = oaNew.getField("cnw-pending-approval-groups").split(",");
         for ( i=0 ; i<aPAGrps.length ; i++ ) {
           if ( isNotBlank(aPAGrps[i]) ) {
-            logger.info(" - adding Pending Approval Group to notification -> " + aPAGrps[i]);
-            oaNotify.addUser(aPAGrps[i]);
-            bAdded = true;
+            logger.info(" - adding Pending Approval Group to notification -> " + aPAGrps[i]) ; oaNotify.addUser(aPAGrps[i]) ; bAdded = true;
           }
         }
-        if ( oNewCAB.equals("Enterprise") ) {
+        if ( oNewCAB.equals("Enterprise") || oNewCAB.equals("Emergency") ) {
           aFAGrps = oaNew.getField("approvals-required").split(",");
           for ( i=0 ; i<aFAGrps.length ; i++ ) {
             if ( isNotBlank(aFAGrps[i]) ) {
-              logger.info(" - adding Future Approval Group to notification -> " + aFAGrps[i]);
-              oaNotify.addUser(aFAGrps[i]);
-              bAdded = true;
+              logger.info(" - adding Future Approval Group to notification -> " + aFAGrps[i]) ; oaNotify.addUser(aFAGrps[i]) ; bAdded = true;
             }
           }
-        }
-        if ( oNewType.equals("Emergency") && oNewCAB.equals("Team") ) {
-          sCABDL = "CA - IT ITSM Emergency CAB";
-          logger.info(" - adding Emergency CAB DL to notification -> " + sCABDL);
-          oaNotify.addUser(sCABDL);
-          bAdded = true;
         }
         if (bAdded) {
           sEvtText = "The RFC <b>requires approval</b> from your team!";
@@ -300,6 +301,48 @@ function notifyApprovalRequested(oaOld,oaNew,oaNotify) {
     }
   }
   logger.info(sLog+" ### notifyApprovalRequested Exit false ###");
+  return false;
+}
+
+function notifyAcceptanceRequested(oaOld,oaNew,oaNotify) {
+//-----------------------------------------------------------------------------
+// Notification for cnw-pending-approval-groups -> Unplanned
+//-----------------------------------------------------------------------------
+  sLog = oaNew.getField("request-id");
+  logger.info(sLog+" ### notifyAcceptanceRequested Entry ###");
+  oNewType = oaNew.getField("category") ; oNewPhase = oaNew.getField("status") ; oOldPhase = (oaOld==null) ? "" : oaOld.getField("status") ; oNewCAB = oaNew.getField("cnw-cab-level");
+  if ( oNewType.equals("Unplanned") ) {
+    if ( oaOld==null || !oOldPhase.equals(STATUS_PENDING_ACCEPTANCE) ) {
+      if ( oNewPhase.equals(STATUS_PENDING_ACCEPTANCE) ) {
+        bAdded = false;
+        aPAGrps = oaNew.getField("cnw-pending-approval-groups").split(",");
+        for ( i=0 ; i<aPAGrps.length ; i++ ) {
+          if ( isNotBlank(aPAGrps[i]) ) {
+            logger.info(" - adding Pending Approval Group to notification -> " + aPAGrps[i]) ; oaNotify.addUser(aPAGrps[i]) ; bAdded = true;
+          }
+        }
+        if ( oNewCAB.equals("Enterprise") ) {
+          aFAGrps = oaNew.getField("approvals-required").split(",");
+          for ( i=0 ; i<aFAGrps.length ; i++ ) {
+            if ( isNotBlank(aFAGrps[i]) ) {
+              logger.info(" - adding Future Approval Group to notification -> " + aFAGrps[i]) ; oaNotify.addUser(aFAGrps[i]) ; bAdded = true;
+            }
+          }
+        }
+        if (bAdded) {
+          sEvtText = "The Unplanned RFC <b>requires Acceptance</b> from your team!";
+          sActText = "As a designated <b>Change Approver</b> for your team, please <b>review the Unplanned RFC for acceptance</b>.";
+          sActFont = "red";
+          oaNotify.setMessage(msgCreate(sEvtText,sActText,sActFont));
+          logger.info(sLog+" ### notifyAcceptanceRequested Exit true ###");
+          return true;
+        } else {
+          logger.info(" # ERROR # No Approval Groups to add! -> exiting");
+        }
+      }
+    }
+  }
+  logger.info(sLog+" ### notifyAcceptanceRequested Exit false ###");
   return false;
 }
 
@@ -347,7 +390,7 @@ sLog = oaNew.getField("request-id");
   oNewType = oaNew.getField("category") ; oNewPhase = oaNew.getField("status") ; oOldPhase = (oaOld==null) ? "" : oaOld.getField("status"); 
   if ( oNewType.equals("Standard") && oNewPhase.equals(STATUS_SCHEDULED) ) {
     if ( oaOld!=null || !oNewPhase.equals(oOldPhase) ) {
-      bAdded = false;
+      bAdded = false ; bImpAdd = false;
       aField = ["cnw-originator-account","cnw-initiated-by-account","cnw-change-owner-account"];
       for( i=0 ; i<aField.length ; i++ ) {
         sData = oaNew.getField(aField[i]) ; logger.info(" - adding "+aField[i]+" to notification -> " + sData) ; oaNotify.addUser(sData);
@@ -356,20 +399,17 @@ sLog = oaNew.getField("request-id");
       sIAField = "cnw-implementor-account" ; sIAData = oaNew.getField(sIAField); 
       sITField = "cw-implementing-team"    ; sITData = oaNew.getField(sITField);
       if ( isNotBlank(sIAData) ) {
-        logger.info(" - adding "+sIAField+" to notification -> " + sIAData) ; oaNotify.addUser(sIAData);
-        bAdded = true; 
-        sTitle = "Change Implementor";
-        sTFill = sIAName;
+        bImpAdd = true ; sField = sIAField ; sData = sIAData ; sTFill = sIAName ; sTitle = "Change Implementor";
       } else if ( isNotBlank(sITData) ) {
-        logger.info(" - adding "+sITField+" to notification -> " + sITData) ; oaNotify.addUser(sITData);
-        bAdded = true; 
-        sTitle = "Change Implementing Team";
-        sTFill = sITData;
+        bImpAdd = true ; sField = sITField ; sData = sITData ; sTFill = sData   ; sTitle = "Change Implementing Team";
       }
-      sEvtText  =  "The Standard RFC has been <b><u>Scheduled</u></b> for implementation!";
-      sActText  =  "As the <b>"+sTitle+"</b> ("+sTFill+"), please take note of the <b>Planned Start</b> (see below) and plan accordingly.";
-      sActFont  =  "red";
+      if (bImpAdd) {
+        logger.info(" - adding "+sField+" to notification -> " + sData) ; oaNotify.addUser(sData) ; bAdded = true;
+      }
       if (bAdded) {
+        sEvtText = "The Standard RFC has been <b><u>Scheduled</u></b> for implementation!";
+        sActText = "As the <b>"+sTitle+"</b> ("+sTFill+"), please take note of the <b>Planned Start</b> (see below) and plan accordingly.";
+        sActFont = "red";
         oaNotify.setMessage( msgCreate(sEvtText,sActText,sActFont) );
         logger.info(sLog+" ### notifyNewToScheduled Exit true ###");
         return true;
@@ -391,25 +431,26 @@ function notifyPendingApprovalToScheduled(oaOld,oaNew,oaNotify) {
   oNewType = oaNew.getField("category") ; oNewPhase = oaNew.getField("status") ; oOldPhase = (oaOld==null) ? "" : oaOld.getField("status"); 
   if ( oNewType.equals("Normal") || oNewType.equals("Emergency") ) {
     if ( oaOld!=null && oNewPhase.equals(STATUS_SCHEDULED) && oOldPhase.equals(STATUS_PENDING_APPROVAL) ) {
-      bAdded = false;
+      bAdded = false ; bImpAdd = false;
+      aField = ["cnw-change-owner-account"];
+      for( i=0 ; i<aField.length ; i++ ) {
+        sData = oaNew.getField(aField[i]) ; logger.info(" - adding "+aField[i]+" to notification -> " + sData) ; oaNotify.addUser(sData) ; bAdded = true; 
+      }
       sIAName  = oaNew.getField("cw-implementor");
       sIAField = "cnw-implementor-account" ; sIAData = oaNew.getField(sIAField); 
       sITField = "cw-implementing-team"    ; sITData = oaNew.getField(sITField);
       if ( isNotBlank(sIAData) ) {
-        logger.info(" - adding "+sIAField+" to notification -> " + sIAData) ; oaNotify.addUser(sIAData);
-        bAdded = true; 
-        sTitle = "Change Implementor";
-        sTFill = sIAName;
+        bImpAdd = true ; sField = sIAField ; sData = sIAData ; sTFill = sIAName ; sTitle = "Change Implementor";
       } else if ( isNotBlank(sITData) ) {
-        logger.info(" - adding "+sITField+" to notification -> " + sITData) ; oaNotify.addUser(sITData);
-        bAdded = true; 
-        sTitle = "Change Implementing Team";
-        sTFill = sITData;
+        bImpAdd = true ; sField = sITField ; sData = sITData ; sTFill = sData   ; sTitle = "Change Implementing Team";
       }
-      sEvtText  =  "The RFC has been <b>Approved</b> and is now <b><u>Scheduled</u></b> for implementation.";
-      sActText  =  "As the <b>"+sTitle+"</b> ("+sTFill+"), please take note of the <b>Planned Start</b> (see below) and plan accordingly.";
-      sActFont  =  "red";
+      if (bImpAdd) {
+        logger.info(" - adding "+sField+" to notification -> " + sData) ; oaNotify.addUser(sData) ; bAdded = true;
+      }
       if (bAdded) {
+        sEvtText = "The RFC has been <b>Approved</b> and is now <b><u>Scheduled</u></b> for implementation.";
+        sActText = "As the <b>"+sTitle+"</b> ("+sTFill+"), please take note of the <b>Planned Start</b> (see below) and plan accordingly.";
+        sActFont = "red";
         oaNotify.setMessage( msgCreate(sEvtText,sActText,sActFont) );
         logger.info(sLog+" ### notifyNewToScheduled Exit true ###");
         return true;
@@ -427,17 +468,25 @@ function notifyScheduledToClosed(oaOld,oaNew,oaNotify) {
 //-----------------------------------------------------------------------------
   sLog = oaNew.getField("request-id");
   logger.info(sLog + " ### notifyScheduledToClosed Entry ###");
+  sEvtText = "The RFC phase has changed from <b><u>Scheduled</u></b> to <b><u>Closed</u></b>."; 
+  sActText = "Please take note that this RFC has been <b><u>Closed</u></b>";
+  sActFont = "red";
   oNewType = oaNew.getField("category") ; oNewPhase = oaNew.getField("status") ; oOldPhase = (oaOld==null) ? "" : oaOld.getField("status"); 
   if ( oNewType.equals("Standard") && oNewPhase.equals(STATUS_CLOSED) ) {
     if ( oaOld!=null || !oNewPhase.equals(oOldPhase) ) {
+      bAdded = false; 
+      aField = ["cnw-originator-account","cnw-initiated-by-account"];
+      for( i=0 ; i<aField.length ; i++ ) {
+        sData = oaNew.getField(aField[i]) ; logger.info(" - adding "+aField[i]+" to notification -> " + sData) ; oaNotify.addUser(sData) ; bAdded = true; 
+      }
+      bOwnAdd  = false; 
       sField = "cnw-change-owner-account" ; sName = oaNew.getField("contact-person") ; sData = oaNew.getField(sField); 
       if ( isNotBlank(sData) ) {
-        logger.info(" - adding "+sField+" to notification -> " + sData) ; oaNotify.addUser(sData);
-        sTitle    = "Change Owner";
-        sTFill    = sName;
-        sEvtText  =  "The RFC phase has changed from <b><u>Scheduled</u></b> to <b><u>Closed</u></b>.";
-        sActText  =  "As the <b>"+sTitle+"</b> ("+sTFill+"), please take note that this RFC has been <b><u>Closed</u></b>";
-        sActFont  =  "red";
+        logger.info(" - adding "+sField+" to notification -> " + sData) ; oaNotify.addUser(sData) ; bAdded = true;
+        sTitle = "Change Owner" ; sTFill = sName;
+        sActText = "As the <b>"+sTitle+"</b> ("+sTFill+"), please take note that this RFC has been <b><u>Closed</u></b>";
+      }
+      if (bAdded) {
         oaNotify.setMessage( msgCreate(sEvtText,sActText,sActFont) );
         logger.info(sLog+" ### notifyNewToScheduled Exit true ###");
         return true;
@@ -458,14 +507,16 @@ function notifyScheduledToImplemented(oaOld,oaNew,oaNotify) {
   oNewType = oaNew.getField("category") ; oNewPhase = oaNew.getField("status") ; oOldPhase = (oaOld==null) ? "" : oaOld.getField("status"); 
   if ( oNewType.equals("Normal") || oNewType.equals("Emergency") || oNewType.equals("Standard") ) {
     if ( (oaOld!=null) && (oNewPhase.equals(STATUS_IMPLEMENTED)) && (oOldPhase.equals(STATUS_SCHEDULED)) ) {
+      bAdded = false;
       sField = "cnw-change-owner-account" ; sName = oaNew.getField("contact-person") ; sData = oaNew.getField(sField);    
       if ( isNotBlank(sData) ) {
-        logger.info(" - adding "+sField+" to notification -> " + sData) ; oaNotify.addUser(sData);
-        sTitle    = "Change Owner";
-        sTFill    = sName;
+        logger.info(" - adding "+sField+" to notification -> " + sData) ; oaNotify.addUser(sData) ; bAdded = true;
+        sTitle = "Change Owner" ; sTFill = sName;
         sEvtText  =  "The RFC phase has changed from <b><u>Scheduled</u></b> to <b><u>Implemented</u></b>.";
         sActText  =  "As the <b>"+sTitle+"</b> ("+sTFill+"), please validate the RFC has been implemented as expected and then transition it to <b><u>Closed</u></b>.";
         sActFont  =  "red";
+      }
+      if (bAdded) {
         oaNotify.setMessage( msgCreate(sEvtText,sActText,sActFont) );
         logger.info(sLog+" ### notifyNewToScheduled Exit true ###");
         return true;
@@ -483,17 +534,24 @@ function notifyImplementedToClosed(oaOld,oaNew,oaNotify) {
 //-----------------------------------------------------------------------------
   sLog = oaNew.getField("request-id");
   logger.info(sLog + " ### notifyImplementedToClosed Entry ###");
+  sEvtText = "The RFC phase has changed from <b><u>Implemented</u></b> to <b><u>Closed</u></b>.";
+  sActText = "Please take note that this RFC has been <b><u>Closed</u></b>.";
+  sActFont = "red";
   oNewType = oaNew.getField("category") ; oNewPhase = oaNew.getField("status") ; oOldPhase = (oaOld==null) ? "" : oaOld.getField("status"); 
   if ( oNewType.equals("Normal") || oNewType.equals("Emergency") || oNewType.equals("Standard") ) {
     if ( oaOld!=null && oNewPhase.equals(STATUS_CLOSED) && oOldPhase.equals(STATUS_IMPLEMENTED) ) {
-      sField = "cnw-change-owner-account" ; sName = oaNew.getField("contact-person") ; sData = oaNew.getField(sField);    
+      bAdded = false;
+      aField = ["cnw-originator-account","cnw-initiated-by-account"];
+      for( i=0 ; i<aField.length ; i++ ) {
+        sData = oaNew.getField(aField[i]) ; logger.info(" - adding "+aField[i]+" to notification -> " + sData) ; oaNotify.addUser(sData) ; bAdded = true; 
+      }
+      sField = "cnw-change-owner-account" ; sName = oaNew.getField("contact-person") ; sData = oaNew.getField(sField); 
       if ( isNotBlank(sData) ) {
-        logger.info(" - adding "+sField+" to notification -> " + sData) ; oaNotify.addUser(sData);
-        sTitle    = "Change Owner";
-        sTFill    = sName;
-        sEvtText  =  "The RFC phase has changed from <b><u>Implemented</u></b> to <b><u>Closed</u></b>.";
-        sActText  =  "As the <b>"+sTitle+"</b> ("+sTFill+"), please take note that this RFC has been <b><u>Closed</u></b>.";
-        sActFont  =  "red";
+        logger.info(" - adding "+sField+" to notification -> " + sData) ; oaNotify.addUser(sData) ; bAdded = true;
+        sTitle = "Change Owner" ; sTFill = sName;
+        sActText = "As the <b>"+sTitle+"</b> ("+sTFill+"), please take note that this RFC has been <b><u>Closed</u></b>.";
+      }
+      if (bAdded) {
         oaNotify.setMessage( msgCreate(sEvtText,sActText,sActFont) );
         logger.info(sLog+" ### notifyNewToScheduled Exit true ###");
         return true;
@@ -512,16 +570,23 @@ function notifyTypeChanged(oaOld,oaNew,oaNotify) {
   sLog = oaNew.getField("request-id");
   logger.info(sLog + " ### notifyTypeChanged Entry ###");
   oNewType  = oaNew.getField("category") ; oOldType  = (oaOld==null) ? "" : oaOld.getField("category"); 
+  sEvtText  =  "The RFC type has changed from <b><u>"+oOldType+"</u></b> to <b><u>"+oNewType+"</u></b>.";
+  sActText  =  "Please take note that this change has occurred, as it may impact on your planning.";
+  sActFont  =  "red";
   if ( oNewType.equals("Normal") || oNewType.equals("Emergency") || oNewType.equals("Standard") ) {
     if ( oaOld!=null && !oNewType.equals(oOldType) ) {
+      bAdded = false ;
+      aField = ["cnw-initiated-by-account"];
+      for( i=0 ; i<aField.length ; i++ ) {
+        sData = oaNew.getField(aField[i]) ; logger.info(" - adding "+aField[i]+" to notification -> " + sData) ; oaNotify.addUser(sData) ; bAdded = true; 
+      }
       sField = "cnw-change-owner-account" ; sName = oaNew.getField("contact-person") ; sData = oaNew.getField(sField); 
       if ( isNotBlank(sData) ) {
-        logger.info(" - adding "+sField+" to notification -> " + sData) ; oaNotify.addUser(sData);
-        sTitle    = "Change Owner";
-        sTFill    = sName;
-        sEvtText  =  "The RFC type has changed from <b><u>"+oOldType+"</u></b> to <b><u>"+oNewType+"</u></b>.";
-        sActText  =  "As the <b>"+sTitle+"</b> ("+sTFill+"), please take note that this change has occurred, as it may impact on your planning.";
-        sActFont  =  "red";
+        logger.info(" - adding "+sField+" to notification -> " + sData) ; oaNotify.addUser(sData) ; bAdded = true;
+        sTitle = "Change Owner" ; sTFill = sName;
+        sActText = "As the <b>"+sTitle+"</b> ("+sTFill+"), please take note that this change has occurred, as it may impact on your planning.";
+      }
+      if (bAdded) {
         oaNotify.setMessage( msgCreate(sEvtText,sActText,sActFont) );
         logger.info(sLog+" ### notifyNewToScheduled Exit true ###");
         return true;
@@ -539,17 +604,24 @@ function notifyAssignmentChanged(oaOld,oaNew,oaNotify) {
 //-----------------------------------------------------------------------------
   sLog = oaNew.getField("request-id");
   logger.info(sLog + " ### notifyAssignmentChanged Entry ###");
-  oNewAT  = oaNew.getField("cnw-assigned-to") ; oOldAT  = (oaOld==null) ? "" : oaOld.getField("cnw-assigned-to"); 
+  oNewAT = oaNew.getField("cnw-assigned-to") ; oOldAT  = (oaOld==null) ? "" : oaOld.getField("cnw-assigned-to"); 
+  sEvtText = "The RFC has had the <b>Assigned To</b> changed from <b><u>"+oOldAT+"</u></b> to <b><u>"+oNewAT+"</u></b>.";
+  sActText = "Please take note of the assignment change and check if <b>you have a task to complete</b>.";
+  sActFont = "red";
   if ( oaOld!=null && isNotBlank(oNewAT) || isNotBlank(oOldAT) ) {
     if ( !oNewAT.equals(oOldAT) ) {
+      bAdded = false;
+      sField = "cnw-assigned-to-account" ; sData = oaOld.getField(sField); 
+      if ( isNotBlank(sData) ) {
+        logger.info(" - adding "+sField+" to notification -> " + sData) ; oaNotify.addUser(sData) ; bAdded = true;
+      }
       sField = "cnw-assigned-to-account" ; sName = oaNew.getField("cnw-assigned-to") ; sData = oaNew.getField(sField); 
       if ( isNotBlank(sData) ) {
-        logger.info(" - adding "+sField+" to notification -> " + sData) ; oaNotify.addUser(sData);
-        sTitle    = "Assigned To";
-        sTFill    = sName;
-        sEvtText  =  "The RFC has had the <b>Assigned To</b> changed from <b><u>"+oOldAT+"</u></b> to <b><u>"+oNewAT+"</u></b>.";
-        sActText  =  "As the <b>"+sTitle+"</b> ("+sTFill+"), please take note of the assignment change and check if <b>you have a task to complete</b>.";
-        sActFont  =  "red";
+        logger.info(" - adding "+sField+" to notification -> " + sData) ; oaNotify.addUser(sData) ; bAdded = true;
+        sTitle = "Assigned To" ; sTFill = sName;
+        sActText =  "As the <b>"+sTitle+"</b> ("+sTFill+"), please take note of the assignment change and check if <b>you have a task to complete</b>.";
+      }
+      if (bAdded) {
         oaNotify.setMessage( msgCreate(sEvtText,sActText,sActFont) );
         logger.info(sLog+" ### notifyNewToScheduled Exit true ###");
         return true;
