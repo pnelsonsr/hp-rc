@@ -1,6 +1,6 @@
 // -------------------------------------------------------------------------------------
    name      =  "change-flow.js" ;
-   version   =  "0.2.3a2"        ;
+   version   =  "0.2.3a1"        ;
    revision  =  "2010-153"       ;
 // -------------------------------------------------------------------------------------
 //  Functions for RFC Notification 
@@ -209,8 +209,9 @@ function notifyPlannedStartEnd(oaOld,oaNew,oaNotify) {
       if ( oNewPhase.equals(STATUS_OPEN) || oNewPhase.equals(STATUS_PENDING_APPROVAL) || oNewPhase.equals(STATUS_PENDING_ACCEPTANCE) || oNewPhase.equals(STATUS_SCHEDULED) ) {
         aField = ["cnw-originator-account","cnw-initiated-by-account","cnw-change-owner-account"];
         for( i=0 ; i<aField.length ; i++ ) {
-          sData = oaNew.getField(aField[i]) ; logger.info(" - adding "+aField[i]+" to notification -> " + sData) ; oaNotify.addUser(sData) ; bAdded = true;
+          sData = oaNew.getField(aField[i]) ; logger.info(" - adding "+aField[i]+" to notification -> " + sData) ; oaNotify.addUser(sData);
         }
+        bAdded = true;
       }
       if ( oNewPhase.equals(STATUS_PENDING_APPROVAL) || oNewPhase.equals(STATUS_PENDING_ACCEPTANCE) ) {
         sField = "cnw-change-owner-account"; 
