@@ -1,6 +1,6 @@
 // -------------------------------------------------------------------------------------
    name      =  "change-flow.js" ;
-   version   =  "0.2.3a4"        ;
+   version   =  "0.2.3a6"        ;
    revision  =  "2010-154"       ;
 // -------------------------------------------------------------------------------------
 //  Functions for RFC Notification 
@@ -129,7 +129,7 @@ function getUsersToNotify(oaOld,oaNew,oaNotify) {
 //-----------------------------------------------------------------------------
   sLog = oaNew.getField("request-id");
   logger.info(sLog+" *** getUsersToNotify Entry ***");
-  logger.info(sLog+" - "+name+" version "+version+" revision "+revision);
+  logger.info(sLog+" ### "+name+" version "+version+" revision "+revision+" ###");
   bResult = false;
   if (!bResult) {bResult = notifyCancelled                  (oaOld,oaNew,oaNotify);}
   if (!bResult) {bResult = notifyPlannedStartEnd            (oaOld,oaNew,oaNotify);}
@@ -293,7 +293,8 @@ function notifyApprovalRequested(oaOld,oaNew,oaNotify) {
           sActFont = "red";
           oaNotify.setMessage(msgCreate(sEvtText,sActText,sActFont));
           logger.info(sLog+" ### notifyApprovalRequested Exit true ###");
-          return true;
+//        return true;
+          return false;
         } else {
           logger.info(" # ERROR # No Approval Groups to add! -> exiting");
         }

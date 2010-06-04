@@ -1,17 +1,20 @@
 #===============================================================================
 # Code Jock..: Patrick Nelson
-# Version....: 0.1.2
-# Revision...: 2010-147
+# Version....: 0.1.3
+# Revision...: 2010-154
 #-------------------------------------------------------------------------------
 # ToDo list for change-flow project
 #===============================================================================
-  - assigned to nt field is not updated on a change to it assigned to
-X - Add IsNotBlank() function
-  - Need for oaOld!=null (line 5) 
-  - Move sCABDL up to var area
-  - Fix notifyApprovalRequest oaOld==null line (line 5) <- not needed?
-X - Add ECAB Notification.
-X - Remove unused vars.
-X - Remove unused functions.
-X - Rename vars based on standardization.
-X - Standardize code functions.
+X - line 215 (in notifyPlannedStartEnd) PAp/PAc is never reached so what to do? Is only reached when Phase is same.
+X - cnf.orig.operator.nt missing display/update in FC -> added calc for field update.
+X - assigned to nt field is not updated on a change to it assigned to -> in fc all nt's failed to update on save.
+X - Add IsNotBlank() function -> added.
+X - Need for oaOld!=null (line 5) of most functions -> Removed all
+X - Move sCABDL up to var area -> removed sCABDL as FA is sent notification
+X - Fix notifyApprovalRequest/notifyAcceptanceRequest oaOld==null line (line 5) not needed? -> No so removed.
+X - Add EmgCAB Notification -> added.
+X - Fix EntCAB Notification -> fixed.
+X - Remove unused vars -> cleared out unused vars.
+X - Remove unused functions -> cleared out unused functions.
+X - Rename vars based on standardization -> renamed and standardized.
+X - Standardize code functions -> stadardized workflows.
