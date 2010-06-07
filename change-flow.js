@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------
    name      =  "change-flow.js" ;
-   version   =  "0.2.3c1"        ;
-   revision  =  "2010-154"       ;
+   version   =  "0.2.3c2"        ;
+   revision  =  "2010-158"       ;
 // -------------------------------------------------------------------------------------
 //  Functions for RFC Notification 
 // -------------------------------------------------------------------------------------
@@ -352,7 +352,7 @@ function notifyNewToOpen(oaOld,oaNew,oaNotify) {
   oNewType = oaNew.getField("category") ; oNewPhase = oaNew.getField("status") ; oOldPhase = (oaOld==null) ? "" : oaOld.getField("status"); 
   if ( ( oNewType.equals("Normal") || oNewType.equals("Emergency") ) && oNewPhase.equals(STATUS_OPEN) && !oNewPhase.equals(oOldPhase) ) {
     bNoCTL = false;
-    aField = ["cnw-team-lead-account","cnw-originator-account","cnw-initiated-by-account"];
+    aField = ["cnw-team-lead-account","cnw-originator-account","cnw-initiated-by-account","cnw-change-owner-account"];
     for( i=0 ; i<aField.length ; i++ ) {
       sData = oaNew.getField(aField[i]);
       if ( isNotBlank(sData) ) {
