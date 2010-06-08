@@ -1,10 +1,12 @@
 #===============================================================================
 # Code Jock..: Patrick Nelson
-# Version....: 0.1.3
-# Revision...: 2010-154
+# Version....: 0.1.4
+# Revision...: 2010-158
 #-------------------------------------------------------------------------------
 # ToDo list for change-flow project
 #===============================================================================
+X - fix notification email 1 too many lines bewtween changeflow message and RFC Description -> fixed in mailbody-html.ftl
+X - add owner to new-open -> added cnw-change-owner-account to notifyNewToOpen
 X - line 215 (in notifyPlannedStartEnd) PAp/PAc is never reached so what to do? Is only reached when Phase is same.
 X - cnf.orig.operator.nt missing display/update in FC -> added calc for field update.
 X - assigned to nt field is not updated on a change to it assigned to -> in fc all nt's failed to update on save.
