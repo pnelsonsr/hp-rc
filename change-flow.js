@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------
    name      =  "change-flow.js" ;
-   version   =  "0.2.3c2"        ;
-   revision  =  "2010-158"       ;
+   version   =  "0.2.4a1"        ;
+   revision  =  "2010-165"       ;
 // -------------------------------------------------------------------------------------
 //  Functions for RFC Notification 
 // -------------------------------------------------------------------------------------
@@ -143,6 +143,7 @@ function getUsersToNotify(oaOld,oaNew,oaNotify) {
   if (!bResult) {bResult = notifyImplementedToClosed        (oaOld,oaNew,oaNotify);}
   if (!bResult) {bResult = notifyTypeChanged                (oaOld,oaNew,oaNotify);}
   if (!bResult) {bResult = notifyAssignmentChanged          (oaOld,oaNew,oaNotify);}
+  if (!bResult) {bResult = notifyPlannedOverdue             (oaOld,oaNew,oaNotify);}
   logger.info(sLog + " *** getUsersToNotify Exit ***");
 }
 
@@ -611,6 +612,32 @@ function notifyAssignmentChanged(oaOld,oaNew,oaNotify) {
     logger.info(" # ERROR # cnw-assigned-to-account is null -> Cancelling assignment changed notification!");
   }
   logger.info(sLog + " ### notifyAssignmentChanged Exit false ###");
+  return false;
+}
+
+function notifyPlannedOverdue(oaOld,oaNew,oaNotify) {
+//-----------------------------------------------------------------------------
+// Notification for Planned Overdue
+//-----------------------------------------------------------------------------
+  sLog = oaNew.getField("request-id");
+  logger.info(sLog + " ### notifyPlannedOverdue Entry ###");
+  oNewType = oaNew.getField("category") ; oNewPhase = oaNew.getField("status") ; oOldPhase = (oaOld==null) ? "" : oaOld.getField("status"); 
+  oNewDays = oaNew.getField("cnw-planned-days"); oOldDays = (oaOld==null) ? "0" : oaOld.getField("cnw-planned-days");
+  if ( !oNewType.equals("Unplanned") && !oNewPhase.equals(STATUS_CLOSED) && !oNewPhase.equals(oOldPhase) && oNewDays>0 && !oNewDays.equals(oOldDays) ) {
+    sField = "cnw-change-owner-account" ; sName = oaNew.getField("contact-person") ; sData = oaNew.getField(sField);    
+    if ( isNotBlank(sData) ) {
+      logger.info(" - adding "+sField+" to notification -> " + sData) ; oaNotify.addUser(sData);
+      sTitle    = "Change Owner" ; sTFill    = sName;
+      sEvtText  =  "The RFC <b>Planned Date</b> is Overdue by "++" days.";
+      sActText  =  "As the <b>"+sTitle+"</b> ("+sTFill+"), please validate the RFC <b>Planned Dates</b> and update as neccessary or cancell the RFC.";
+      sActFont  =  "red";
+      oaNotify.setMessage( msgCreate(sEvtText,sActText,sActFont) );
+      logger.info(sLog+" ### notifyPlannedOverdue Exit true ###");
+      return true;
+    }
+    logger.info(" # ERROR # cnw-change-owner-account is null -> Cancelling Planned Overdue notification!");
+  }
+  logger.info(sLog + " ### notifyPlannedOverdue Exit false ###");
   return false;
 }
 
