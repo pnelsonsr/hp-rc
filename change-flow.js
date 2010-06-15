@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------
    name      =  "change-flow.js" ;
-   version   =  "0.2.4a1"        ;
-   revision  =  "2010-165"       ;
+   version   =  "0.2.4a7"        ;
+   revision  =  "2010-166"       ;
 // -------------------------------------------------------------------------------------
 //  Functions for RFC Notification 
 // -------------------------------------------------------------------------------------
@@ -621,15 +621,15 @@ function notifyPlannedOverdue(oaOld,oaNew,oaNotify) {
 //-----------------------------------------------------------------------------
   sLog = oaNew.getField("request-id");
   logger.info(sLog + " ### notifyPlannedOverdue Entry ###");
-  oNewType = oaNew.getField("category") ; oNewPhase = oaNew.getField("status") ; oOldPhase = (oaOld==null) ? "" : oaOld.getField("status"); 
-  oNewDays = oaNew.getField("cnw-planned-days"); oOldDays = (oaOld==null) ? "0" : oaOld.getField("cnw-planned-days");
-  if ( !oNewType.equals("Unplanned") && !oNewPhase.equals(STATUS_CLOSED) && !oNewPhase.equals(oOldPhase) && oNewDays>0 && !oNewDays.equals(oOldDays) ) {
+  oNewType = oaNew.getField("category") ; oNewPhase = oaNew.getField("status"); 
+  oNewDays = oaNew.getField("cnw-planned-days") ; oOldDays = (oaOld==null) ? "0" : oaOld.getField("cnw-planned-days");
+  if ( !oNewType.equals("Unplanned") && !oNewPhase.equals(STATUS_CLOSED) && oNewDays>0 && !oNewDays.equals(oOldDays) ) {
     sField = "cnw-change-owner-account" ; sName = oaNew.getField("contact-person") ; sData = oaNew.getField(sField);    
     if ( isNotBlank(sData) ) {
       logger.info(" - adding "+sField+" to notification -> " + sData) ; oaNotify.addUser(sData);
       sTitle    = "Change Owner" ; sTFill    = sName;
-      sEvtText  =  "The RFC <b>Planned Date</b> is Overdue by "++" days.";
-      sActText  =  "As the <b>"+sTitle+"</b> ("+sTFill+"), please validate the RFC <b>Planned Dates</b> and update as neccessary or cancell the RFC.";
+      sEvtText  =  "The RFC's <b>Planned Date</b> is Overdue by "+oNewDays+" days.";
+      sActText  =  "As the <b>"+sTitle+"</b> ("+sTFill+"), please close, cancel, or reschedule the RFC.";
       sActFont  =  "red";
       oaNotify.setMessage( msgCreate(sEvtText,sActText,sActFont) );
       logger.info(sLog+" ### notifyPlannedOverdue Exit true ###");
@@ -676,18 +676,17 @@ function dOut(oaDate) {
 //-----------------------------------------------------------------------------
   Date.prototype.getDayName   = function() {return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][this.getDay()];}
   Date.prototype.getMonthName = function() {return ['January','February','March','April','May','June','July','August','September','October','November','December'][this.getMonth()];}
-  dDate = new Date(parseInt(oaDate)); 
-  nTZH  = dDate.getTimezoneOffset() / 60 ;
-  sTZN  = (nTZH == 8) ? "PST" : "PDT";
-  dDate.setHours(dDate.getHours() + nTZH); 
-  sAorP    = (dDate.getHours()<12) ? "AM" : "PM";
-  sHours   = dDate.getHours()   ; sHours   = (sHours   < 10) ? "0"+sHours   : sHours;
-  sMinutes = dDate.getMinutes() ; sMinutes = (sMinutes < 10) ? "0"+sMinutes : sMinutes;
-  sSeconds = dDate.getSeconds() ; sSeconds = (sSeconds < 10) ? "0"+sSeconds : sSeconds;
-  sReturn  = dDate.getDayName()+", ";
-  sReturn += dDate.getMonthName()+" "+dDate.getDate()+", "+dDate.getFullYear()+", ";
-  sReturn += sHours+":"+sMinutes+":"+sSeconds+" "+sAorP+" ("+sTZN+")";
-  bLogIt = false;if(bLogIt) {logger.info(" - nTZH    -> "+nTZH);logger.info(" - sTZN    -> "+sTZN);logger.info(" - sAorP   -> "+sAorP);logger.info(" - oaDate   -> "+oaDate);logger.info(" - dDate   -> "+dDate);logger.info(" - sReturn -> "+sReturn);}
+  dDate     = new Date(parseInt(oaDate)); 
+  nTZH      = dDate.getTimezoneOffset() / 60 ;
+  sTZN      = (nTZH == 8) ? "PST" : "PDT";
+  sAorP     = (dDate.getHours()<12) ? "AM" : "PM";
+  sHours    = dDate.getHours()   ; sHours   = (sHours   < 10) ? "0"+sHours   : sHours;
+  sMinutes  = dDate.getMinutes() ; sMinutes = (sMinutes < 10) ? "0"+sMinutes : sMinutes;
+  sSeconds  = dDate.getSeconds() ; sSeconds = (sSeconds < 10) ? "0"+sSeconds : sSeconds;
+  sReturn   = dDate.getDayName()+", ";
+  sReturn  += dDate.getMonthName()+" "+dDate.getDate()+", "+dDate.getFullYear()+", ";
+  sReturn  += sHours+":"+sMinutes+":"+sSeconds+" "+sAorP+" ("+sTZN+")";
+  bLogIt = false;if(bLogIt) {logger.info(" - nTZH    -> "+nTZH);logger.info(" - sTZN    -> "+sTZN);logger.info(" - sAorP   -> "+sAorP);logger.info(" - oaDate   -> "+oaDate);logger.info(" - sHours   -> "+sHours);logger.info(" - sMinutes -> "+sMinutes);logger.info(" - sSeconds   -> "+sSeconds);logger.info(" - dDate   -> "+dDate);logger.info(" - sReturn -> "+sReturn);}
   return sReturn;
 }
 
