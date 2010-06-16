@@ -5,20 +5,20 @@
 #-------------------------------------------------------------------------------
 # ToDo list for rc code project
 #===============================================================================
-X - fix dOut() function to not add current TZ
-X - add planned days notification
-X - fix notification email 1 too many lines bewtween changeflow message and RFC Description -> fixed in mailbody-html.ftl
-X - add owner to new-open -> added cnw-change-owner-account to notifyNewToOpen
-X - line 215 (in notifyPlannedStartEnd) PAp/PAc is never reached so what to do? Is only reached when Phase is same.
-X - cnf.orig.operator.nt missing display/update in FC -> added calc for field update.
-X - assigned to nt field is not updated on a change to it assigned to -> in fc all nt's failed to update on save.
-X - Add IsNotBlank() function -> added.
-X - Need for oaOld!=null (line 5) of most functions -> Removed all
-X - Move sCABDL up to var area -> removed sCABDL as FA is sent notification
-X - Fix notifyApprovalRequest/notifyAcceptanceRequest oaOld==null line (line 5) not needed? -> No so removed.
-X - Add EmgCAB Notification -> added.
-X - Fix EntCAB Notification -> fixed.
-X - Remove unused vars -> cleared out unused vars.
-X - Remove unused functions -> cleared out unused functions.
-X - Rename vars based on standardization -> renamed and standardized.
-X - Standardize code functions -> stadardized workflows.
+X-mailbody-html-fix notification email for 1 line bewtween changeflow msg and RFC Description -> around line 275
+X-convertChange-fix dOut() function to not add current TZ
+X-change-flow  -add planned days notification
+X-change-flow  -add owner to new-open -> added cnw-change-owner-account to notifyNewToOpen
+X-change-flow  -line 215 (in notifyPlannedStartEnd) PAp/PAc is never reached so what to do? Is only reached when Phase is same.
+X-change-flow  -cnf.orig.operator.nt missing display/update in FC -> added calc for field update.
+X-change-flow  -assigned to nt field is not updated on a change to it assigned to -> in fc all nt's failed to update on save.
+X-change-flow  -Add IsNotBlank() function -> added.
+X-change-flow  -Need for oaOld!=null (line 5) of most functions -> Removed all
+X-change-flow  -Move sCABDL up to var area -> removed sCABDL as FA is sent notification
+X-change-flow  -Fix notifyApprovalRequest/notifyAcceptanceRequest oaOld==null line (line 5) not needed? -> No so removed.
+X-change-flow  -Add EmgCAB Notification -> added.
+X-change-flow  -Fix EntCAB Notification -> fixed.
+X-change-flow  -Remove unused vars -> cleared out unused vars.
+X-change-flow  -Remove unused functions -> cleared out unused functions.
+X-change-flow  -Rename vars based on standardization -> renamed and standardized.
+X-change-flow  -Standardize code functions -> stadardized workflows.
