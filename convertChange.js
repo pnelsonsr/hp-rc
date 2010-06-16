@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------
 // name......:  convertChange.js
-// version...:  0.1.23
-// revision..:  2010-133
+// version...:  0.1.24
+// revision..:  2010-165
 // -------------------------------------------------------------------------------------
 //  Functions for the parsing of SM RFCs
 // -------------------------------------------------------------------------------------
@@ -254,6 +254,11 @@ function convert(argChange, argGeneric) {
   // planned-start-time 
   logger.debug("set planned-start-time -> " + argChange.get("header.plannedStartDate"));
   setDateField(argChange.get("header.plannedStartDate"), "planned-start-time", argGeneric); 
+
+  // cnw-planned-days
+  var rcCnwPlannedDays = argChange.get("header.plannedDays");
+  logger.debug("set cnw-planned-days -> " + rcCnwPlannedDays);
+  argGeneric.setField("cnw-planned-days",rcCnwPlannedDays); 
 
   // scheduled-downtime-end
   logger.debug("set scheduled-downtime-end -> " + argChange.get("middle.outageEnd"));
