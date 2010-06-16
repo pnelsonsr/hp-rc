@@ -1,10 +1,12 @@
 #===============================================================================
 # Code Jock..: Patrick Nelson
-# Version....: 0.1.4
-# Revision...: 2010-158
+# Version....: 0.1.5
+# Revision...: 2010-166
 #-------------------------------------------------------------------------------
-# ToDo list for change-flow project
+# ToDo list for rc code project
 #===============================================================================
+X - fix dOut() function to not add current TZ
+X - add planned days notification
 X - fix notification email 1 too many lines bewtween changeflow message and RFC Description -> fixed in mailbody-html.ftl
 X - add owner to new-open -> added cnw-change-owner-account to notifyNewToOpen
 X - line 215 (in notifyPlannedStartEnd) PAp/PAc is never reached so what to do? Is only reached when Phase is same.
