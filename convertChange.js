@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------
 // name......:  convertChange.js
-// version...:  0.1.22
-// revision..:  2010-132
+// version...:  0.1.23
+// revision..:  2010-133
 // -------------------------------------------------------------------------------------
 //  Functions for the parsing of SM RFCs
 // -------------------------------------------------------------------------------------
@@ -134,7 +134,7 @@ function convert(argChange, argGeneric) {
   argGeneric.setField("initiated-by", rcInitiatedBy);
   
   // cnw-initiated-by-account
-  var rcInitiatedBy = cwCapitalization(argChange.get("header.requestedByAccount"));  
+  var rcInitiatedBy = argChange.get("header.requestedByAccount");  
   logger.debug("set cnw-initiated-by-account -> " + rcInitiatedBy);
   argGeneric.setField("cnw-initiated-by-account", rcInitiatedBy);
   
