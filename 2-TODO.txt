@@ -1,10 +1,12 @@
 #===============================================================================
 # Code Jock..: Patrick Nelson
-# Version....: 0.1.5
-# Revision...: 2010-166
+# Version....: 0.1.6
+# Revision...: 2010-169
 #-------------------------------------------------------------------------------
 # ToDo list for rc code project
 #===============================================================================
+X-change-flow  -add planned overdue check in plannedoverdue notification
+X-convertChange-add plannedoverdue intacke from WSDL
 X-mailbody-html-fix notification email for 1 line bewtween changeflow msg and RFC Description -> around line 275
 X-convertChange-fix dOut() function to not add current TZ
 X-change-flow  -add planned days notification
