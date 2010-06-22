@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------
    name      =  "change-flow.js" ;
-   version   =  "0.2.5a3"        ;
-   revision  =  "2010-172"       ;
+   version   =  "0.2.6a1"        ;
+   revision  =  "2010-173"       ;
 // -------------------------------------------------------------------------------------
 //  Functions for RFC Notification 
 // -------------------------------------------------------------------------------------
@@ -151,10 +151,11 @@ function notifyTest(oaOld,oaNew,oaNotify) {
 //-----------------------------------------------------------------------------
 // Notification for Change Is Cancelled
 //-----------------------------------------------------------------------------
-  var bDisplay = true;
+  //var bDisplay = true;
+  var bDisplay = false;
   if (bDisplay) {
     sLog = oaNew.getField("request-id");
-    logger.info(sLog+" ### notifyTest ###");
+    logger.info(sLog+" ### notifyTest Entry ###");
     //-- display -- start
     oNewNofify = oaNew.getField("cnw-planned-overdue");
     logger.info(" - Display field value for cnw-planned-overdue -> "+oNewNofify);
