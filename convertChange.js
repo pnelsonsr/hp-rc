@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------
 // name......:  convertChange.js
-// version...:  0.1.25
-// revision..:  2010-169
+// version...:  0.1.26
+// revision..:  2010-172
 // -------------------------------------------------------------------------------------
 //  Functions for the parsing of SM RFCs
 // -------------------------------------------------------------------------------------
@@ -164,7 +164,7 @@ function convert(argChange, argGeneric) {
   argGeneric.setField("new-deployment", rcNewDeploy);
 
   // is-tested
-  var rcIsTested=(argChange.get("header.passedQA")) ? "Yes" : "No"; 
+  var rcIsTested=(argChange.get("header.passedQA") == "true") ? "Yes" : "No"; 
   logger.debug("set is-tested -> " + rcIsTested);
   argGeneric.setField("is-tested", rcIsTested);
   
@@ -261,7 +261,7 @@ function convert(argChange, argGeneric) {
   argGeneric.setField("cnw-planned-days",rcCnwPlannedDays); 
 
   // cnw-planned-overdue
-  var rcCnwPlannedOverdue=(argChange.get("header.plannedOverdue")) ? "Yes" : "No"; 
+  var rcCnwPlannedOverdue=(argChange.get("header.plannedOverdue") == "true") ? "Yes" : "No"; 
   logger.debug("set cnw-planned-overdude -> " + rcCnwPlannedOverdue);
   argGeneric.setField("cnw-planned-overdue",rcCnwPlannedOverdue); 
 
@@ -413,7 +413,7 @@ function convert(argChange, argGeneric) {
   argGeneric.setField("is-sox-app-involved", rcIsSoxAppInvolved);
   
   // cnw-review-required
-  var rcCnwReviewRequired = (argChange.get("header.review") == "true" || argChange.get("header.review") == "1") ? "Yes" : "No" ;  
+  var rcCnwReviewRequired = (argChange.get("header.review") == "true") ? "Yes" : "No" ;  
   logger.debug("set cnw-review-required -> " + rcCnwReviewRequired);
   argGeneric.setField("cnw-review-required", rcCnwReviewRequired);
   

@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------
    name      =  "change-flow.js" ;
-   version   =  "0.2.5a1"        ;
-   revision  =  "2010-169"       ;
+   version   =  "0.2.5a3"        ;
+   revision  =  "2010-172"       ;
 // -------------------------------------------------------------------------------------
 //  Functions for RFC Notification 
 // -------------------------------------------------------------------------------------
@@ -131,7 +131,7 @@ function getUsersToNotify(oaOld,oaNew,oaNotify) {
   logger.info(sLog+" *** getUsersToNotify Entry ***");
   logger.info(sLog+" ### "+name+" version "+version+" revision "+revision+" ###");
   bResult = false;
-  if (!bResult) {bResult = notifyCancelled                  (oaOld,oaNew,oaNotify);}
+  if (!bResult) {bResult = notifyTest                       (oaOld,oaNew,oaNotify);}
   if (!bResult) {bResult = notifyPlannedStartEnd            (oaOld,oaNew,oaNotify);}
   if (!bResult) {bResult = notifyApprovalRequested          (oaOld,oaNew,oaNotify);}
   if (!bResult) {bResult = notifyAcceptanceRequested        (oaOld,oaNew,oaNotify);}
@@ -145,6 +145,35 @@ function getUsersToNotify(oaOld,oaNew,oaNotify) {
   if (!bResult) {bResult = notifyAssignmentChanged          (oaOld,oaNew,oaNotify);}
   if (!bResult) {bResult = notifyPlannedOverdue             (oaOld,oaNew,oaNotify);}
   logger.info(sLog + " *** getUsersToNotify Exit ***");
+}
+
+function notifyTest(oaOld,oaNew,oaNotify) {
+//-----------------------------------------------------------------------------
+// Notification for Change Is Cancelled
+//-----------------------------------------------------------------------------
+  var bDisplay = true;
+  if (bDisplay) {
+    sLog = oaNew.getField("request-id");
+    logger.info(sLog+" ### notifyTest ###");
+    //-- display -- start
+    oNewNofify = oaNew.getField("cnw-planned-overdue");
+    logger.info(" - Display field value for cnw-planned-overdue -> "+oNewNofify);
+    if (oNewNofify.equals("Yes")) {
+      logger.info(" -- True ");
+    } else {
+      logger.info(" -- False ");
+    }
+    oNewDays = oaNew.getField("cnw-planned-days");
+    logger.info(" - Display field value for cnw-planned-days -> "+oNewDays);
+    if (oNewDays > 0) {
+      logger.info(" -- Greater than Zero");
+    } else {
+      logger.info(" -- Less than or Equals Zero");
+    }
+    //-- display -- end
+    logger.info(sLog+" ### notifyTest Exit false ###");
+  }
+  return false;
 }
 
 function notifyCancelled(oaOld,oaNew,oaNotify) {
@@ -621,9 +650,9 @@ function notifyPlannedOverdue(oaOld,oaNew,oaNotify) {
 //-----------------------------------------------------------------------------
   sLog = oaNew.getField("request-id");
   logger.info(sLog + " ### notifyPlannedOverdue Entry ###");
-  oNewType = oaNew.getField("category") ; oNewPhase = oaNew.getField("status") ; oNewOK2Not = oaNew.getField("cnw-planned-overdue")
+  oNewType = oaNew.getField("category") ; oNewPhase = oaNew.getField("status") ; oNewNofify = oaNew.getField("cnw-planned-overdue");
   oNewDays = oaNew.getField("cnw-planned-days") ; oOldDays = (oaOld==null) ? "0" : oaOld.getField("cnw-planned-days");
-  if ( !oNewType.equals("Unplanned") && !oNewPhase.equals(STATUS_CLOSED) && oaNewOK2Not && oNewDays>0 && !oNewDays.equals(oOldDays) ) {
+  if ( !oNewType.equals("Unplanned") && !oNewPhase.equals(STATUS_CLOSED) && oNewNofify.equals("Yes") && oNewDays>0 && !oNewDays.equals(oOldDays) ) {
     sField = "cnw-change-owner-account" ; sName = oaNew.getField("contact-person") ; sData = oaNew.getField(sField);    
     if ( isNotBlank(sData) ) {
       logger.info(" - adding "+sField+" to notification -> " + sData) ; oaNotify.addUser(sData);
