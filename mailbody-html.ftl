@@ -4,8 +4,8 @@
 <!--
 ================================================================================
  name      :  mailbody-html.flt
- version   :  0.1.3
- revision  :  2010-158
+ version   :  0.1.4                                               (see line 703)
+ revision  :  2010-194
 ================================================================================
 -->
 <html>
@@ -136,6 +136,10 @@ table {
 .smallLink {
 	font-size: 9px;
 }
+.version {
+	color:  rgb(208, 208, 208);
+	font-size: 8px;
+}
 </style>
 </head>
 
@@ -253,7 +257,7 @@ table {
 				<tbody>
 
 					<tr>
-						<td><b>RFC:</b> <a href="${request.serverAddress}/index.html?requestOrigin=ONYX&requestedChangeID=${request.getField("internal-id")?string(0)}">${request.getField("request-id")}</a></td>
+						<td><b>RFC:</b> ${request.getField("request-id")}</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="${request.serverAddress}/index.html?requestOrigin=ONYX&requestedChangeID=${request.getField("internal-id")?string(0)}">RC Link</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://dcxvdap203.conway.prod.con-way.com:8080/sm/index.do?ctx=docEngine&file=cm3r&query=number=%22${request.getField("request-id")}%22">SM Link</a></td>
 					</tr>
 					
 					<tr>
@@ -693,6 +697,10 @@ table {
 
 			<br>
 
+		</tr>
+
+		<tr>
+			<td class="version">version 0.1.4</td>
 		</tr>
 
 	</tbody>
