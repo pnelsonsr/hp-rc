@@ -1,6 +1,6 @@
 // -------------------------------------------------------------------------------------
    name      =  "change-flow.js" ;
-   version   =  "0.2.6a3"        ;
+   version   =  "0.2.6a4"        ;
    revision  =  "2010-202"       ;
 // -------------------------------------------------------------------------------------
 //  Functions for RFC Notification 
@@ -649,10 +649,9 @@ function notifyPlannedOverdue(oaOld,oaNew,oaNotify) {
 //-----------------------------------------------------------------------------
 // Notification for Planned Overdue
 //-----------------------------------------------------------------------------
-  sLog = oaNew.getField("request-id");
-  logger.info(sLog + " ### notifyPlannedOverdue Entry ###");
-  oNewType = oaNew.getField("category") ; oNewPhase = oaNew.getField("status") ; oNewNofify = oaNew.getField("cnw-planned-overdue");
-  oNewDays = oaNew.getField("cnw-planned-days") ; oOldDays = (oaOld==null) ? "0" : oaOld.getField("cnw-planned-days") ; var nGD = 3;
+  var sLog=oaNew.getField("request-id");logger.info(sLog + " ### notifyPlannedOverdue Entry ###");
+  var nGD=3;var oNewType=oaNew.getField("category");var oNewPhase=oaNew.getField("status");var oNewNofify=oaNew.getField("cnw-planned-overdue");
+  var oNewDays=oaNew.getField("cnw-planned-days");var oOldDays=(oaOld==null)?"0":oaOld.getField("cnw-planned-days");
   if ( !oNewType.equals("Unplanned") && !oNewPhase.equals(STATUS_CLOSED) && oNewNofify.equals("Yes") && oNewDays>nGD && !oNewDays.equals(oOldDays) ) {
     sField = "cnw-change-owner-account" ; sName = oaNew.getField("contact-person") ; sData = oaNew.getField(sField);    
     if ( isNotBlank(sData) ) {
