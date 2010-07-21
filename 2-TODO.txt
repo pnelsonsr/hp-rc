@@ -1,10 +1,12 @@
 #===============================================================================
 # Code Jock..: Patrick Nelson
-# Version....: 0.1.6
-# Revision...: 2010-169
+# Version....: 0.1.7
+# Revision...: 2010-202
 #-------------------------------------------------------------------------------
 # ToDo list for rc code project
 #===============================================================================
+X-change-flow  -add var to function variables of notifyPlannedOverdue
+X-change-flow  -add Grace Days to planned overdue check in notifyPlannedOverdue
 X-change-flow  -add planned overdue check in plannedoverdue notification
 X-convertChange-add plannedoverdue intacke from WSDL
 X-mailbody-html-fix notification email for 1 line bewtween changeflow msg and RFC Description -> around line 275
