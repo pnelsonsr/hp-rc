@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------
    name      =  "change-flow.js" ;
-   version   =  "0.2.6a5"        ;
-   revision  =  "2010-202"       ;
+   version   =  "0.2.7a1"        ;
+   revision  =  "2010-203"       ;
 // -------------------------------------------------------------------------------------
 //  Functions for RFC Notification 
 // -------------------------------------------------------------------------------------
@@ -132,6 +132,7 @@ function getUsersToNotify(oaOld,oaNew,oaNotify) {
   logger.info(sLog+" ### "+name+" version "+version+" revision "+revision+" ###");
   bResult = false;
   if (!bResult) {bResult = notifyTest                       (oaOld,oaNew,oaNotify);}
+  if (!bResult) {bResult = notifyCancelled                  (oaOld,oaNew,oaNotify);}
   if (!bResult) {bResult = notifyPlannedStartEnd            (oaOld,oaNew,oaNotify);}
   if (!bResult) {bResult = notifyApprovalRequested          (oaOld,oaNew,oaNotify);}
   if (!bResult) {bResult = notifyAcceptanceRequested        (oaOld,oaNew,oaNotify);}
@@ -149,7 +150,7 @@ function getUsersToNotify(oaOld,oaNew,oaNotify) {
 
 function notifyTest(oaOld,oaNew,oaNotify) {
 //-----------------------------------------------------------------------------
-// Notification for Change Is Cancelled
+// Notification for development testing
 //-----------------------------------------------------------------------------
   //var bDisplay = true;
   var bDisplay = false;
