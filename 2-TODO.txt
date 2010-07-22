@@ -1,10 +1,11 @@
 #===============================================================================
 # Code Jock..: Patrick Nelson
-# Version....: 0.1.7
-# Revision...: 2010-202
+# Version....: 0.1.8
+# Revision...: 2010-203
 #-------------------------------------------------------------------------------
 # ToDo list for rc code project
 #===============================================================================
+X-change-flow  -add back notifyCancelled function call to getUsersToNotify()
 X-change-flow  -add var to function variables of notifyPlannedOverdue
 X-change-flow  -add Grace Days to planned overdue check in notifyPlannedOverdue
 X-change-flow  -add planned overdue check in plannedoverdue notification
