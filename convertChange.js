@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------
 // name......:  convertChange.js
-// version...:  0.1.26
-// revision..:  2010-172
+// version...:  0.1.28
+// revision..:  2010-238
 // -------------------------------------------------------------------------------------
 //  Functions for the parsing of SM RFCs
 // -------------------------------------------------------------------------------------
@@ -55,6 +55,11 @@ function convert(argChange, argGeneric) {
 // -------------------------------------------------------------------------------------
   var smChangeID = argChange.get("header.changeNumber"); 
   logger.info("### converChange convert(" + smChangeID + ") Entry ###");
+
+  // contact-email
+  var smContactEmail="rc.test@con-way.com"
+  logger.debug("set contact-email -> " + smContactEmail);
+  argGeneric.setField("contact-email", smContactEmail);
 
   // reqeust-id
   logger.debug("set request-id -> " + smChangeID);
@@ -262,7 +267,7 @@ function convert(argChange, argGeneric) {
 
   // cnw-planned-overdue
   var rcCnwPlannedOverdue=(argChange.get("header.plannedOverdue") == "true") ? "Yes" : "No"; 
-  logger.debug("set cnw-planned-overdude -> " + rcCnwPlannedOverdue);
+  logger.debug("set cnw-planned-overdue -> " + rcCnwPlannedOverdue);
   argGeneric.setField("cnw-planned-overdue",rcCnwPlannedOverdue); 
 
   // scheduled-downtime-end
