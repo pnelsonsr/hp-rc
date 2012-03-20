@@ -1,9 +1,9 @@
 #===============================================================================
 # Code Jock..: Patrick Nelson
-# Version....: 0.1.8
-# Revision...: 2010-203
+# Version....: 0.1.2
+# Revision...: 2010-166
 #-------------------------------------------------------------------------------
-# ToDo list for rc code project
+# TODO for rc-code project
 #===============================================================================
 X-change-flow  -add back notifyCancelled function call to getUsersToNotify()
 X-change-flow  -add var to function variables of notifyPlannedOverdue

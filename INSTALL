@@ -1,0 +1,10 @@
+#===============================================================================
+# Code Jock..: Patrick Nelson
+# Version....: 0.1.2
+# Revision...: 2010-166
+#-------------------------------------------------------------------------------
+# INSTALL for rc-code project
+#===============================================================================
+1. Run 'make clean' to clean old versions off system and install new versions.
+2. Run 'make install' to install all apps and libraries over old versions.
+3. Run 'make uninstall' to remove all apps and libraries.
